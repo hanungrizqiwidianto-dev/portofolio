@@ -820,31 +820,36 @@ strong {
 
 .company-logo-wrapper {
   display: flex;
-  align-items: center;
-  gap: 15px;
+  align-items: flex-start;
+  gap: 12px;
   margin-bottom: 15px;
 }
 
 .company-logo {
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
+  min-width: 50px;
   object-fit: contain;
   border-radius: 8px;
   background: white;
-  padding: 8px;
+  padding: 6px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .company-info {
   flex: 1;
+  min-width: 0;
 }
 
 .company-info .timeline-title {
   margin-bottom: 5px;
+  font-size: 18px;
 }
 
 .company-info .company {
   margin-bottom: 0;
+  font-size: 13px;
+  line-height: 1.4;
 }
 
 .timeline-body>p,
@@ -912,6 +917,30 @@ strong {
   .timeline>li.timeline-unverted {
     text-align: left;
   }
+
+  /* Company logo responsive - Stack vertically on mobile */
+  .company-logo-wrapper {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .company-logo {
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+    padding: 5px;
+  }
+
+  .company-info .timeline-title {
+    font-size: 17px;
+    margin-bottom: 8px;
+  }
+
+  .company-info .company {
+    font-size: 12px;
+    line-height: 1.5;
+  }
 }
 
 @media screen and (max-width: 480px) {
@@ -921,6 +950,30 @@ strong {
 
   .timeline>li>.timeline-panel {
     width: 75% !important;
+  }
+
+  /* Keep vertical stack on extra small screens */
+  .company-logo-wrapper {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .company-logo {
+    width: 45px;
+    height: 45px;
+    min-width: 45px;
+    padding: 4px;
+  }
+
+  .company-info .timeline-title {
+    font-size: 16px;
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+
+  .company-info .company {
+    font-size: 11px;
+    line-height: 1.4;
   }
 }
 
