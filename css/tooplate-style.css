@@ -818,6 +818,35 @@ strong {
   color: #999;
 }
 
+.company-logo-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.company-logo {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: white;
+  padding: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.company-info {
+  flex: 1;
+}
+
+.company-info .timeline-title {
+  margin-bottom: 5px;
+}
+
+.company-info .company {
+  margin-bottom: 0;
+}
+
 .timeline-body>p,
 .timeline-body>ul {
   margin-bottom: 0;
