@@ -1,0 +1,333 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facade Pattern - Developer Wiki</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+
+<body>
+    <div class="wiki-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-book"></i> Wiki</h2>
+                <button class="close-sidebar" id="closeSidebar"><i class="fas fa-times"></i></button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="../../index.html"><i class="fas fa-home"></i> Home</a>
+                <a href="../getting-started.html"><i class="fas fa-rocket"></i> Getting Started</a>
+
+                <div class="sidebar-section">
+                    <h3 class="section-header"><i class="fas fa-shapes"></i> Design Patterns</h3>
+                    <div class="sidebar-submenu">
+                        <div class="submenu-category">
+                            <h4>Creational</h4>
+                            <a href="builder.html">Builder</a>
+                            <a href="factory-method.html">Factory Method</a>
+                            <a href="singleton.html">Singleton</a>
+                            <a href="abstract-factory.html">Abstract Factory</a>
+                        </div>
+                        <div class="submenu-category">
+                            <h4>Structural</h4>
+                            <a href="adapter.html">Adapter</a>
+                            <a href="bridge.html">Bridge</a>
+                            <a href="decorator.html">Decorator</a>
+                            <a href="facade.html" class="active">Facade</a>
+                        </div>
+                        <div class="submenu-category">
+                            <h4>Behavioral</h4>
+                            <a href="strategy.html">Strategy</a>
+                            <a href="template-method.html">Template Method</a>
+                            <a href="command.html">Command</a>
+                            <a href="mediator.html">Mediator</a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <button class="toggle-sidebar" id="toggleSidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <article class="doc-article">
+                <div class="breadcrumb">
+                    <a href="../../index.html">Home</a> / <a href="../../index.html#patterns">Design Patterns</a> /
+                    Facade
+                </div>
+
+                <h1>Facade Pattern</h1>
+                <div class="doc-meta">
+                    <span class="badge badge-structural">Structural</span>
+                    <span class="badge badge-beginner">Beginner</span>
+                </div>
+
+                <section class="doc-section">
+                    <h2>Overview</h2>
+                    <p>Facade pattern menyediakan simplified interface ke complex system dari classes, library, atau
+                        framework. Pattern ini membuat subsystem lebih mudah digunakan dengan menyembunyikan
+                        kompleksitas di balik interface yang lebih sederhana.</p>
+
+                    <div class="info-box">
+                        <strong>Analogi:</strong> Seperti customer service representative di toko. Alih-alih menghadapi
+                        berbagai departemen (inventory, billing, shipping), Anda hanya perlu berbicara dengan satu orang
+                        yang menangani semua koordinasi internal.
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Problem</h2>
+                    <p>Ketika aplikasi Anda perlu bekerja dengan banyak objek dari sophisticated library atau framework,
+                        Anda harus menginisialisasi semua objek, melacak dependencies, mengeksekusi methods dalam urutan
+                        yang benar, dll. Business logic menjadi tightly coupled dengan implementation details dari
+                        third-party classes.</p>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Solution</h2>
+                    <p>Buat facade class yang menyediakan simple interface ke complex subsystem. Facade mendelegasikan
+                        client requests ke objek-objek yang sesuai dalam subsystem dan menangani kompleksitas workflow.
+                    </p>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Implementation (C#)</h2>
+                    <pre><code class="language-csharp">// Complex Subsystem Classes
+public class VideoFile
+{
+    public string FileName { get; }
+    public VideoFile(string fileName) => FileName = fileName;
+}
+
+public class AudioMixer
+{
+    public void Fix(VideoFile file)
+    {
+        Console.WriteLine($"AudioMixer: fixing audio in {file.FileName}");
+    }
+}
+
+public class VideoCodec { }
+public class MPEG4CompressionCodec : VideoCodec { }
+public class OggCompressionCodec : VideoCodec { }
+
+public class CodecFactory
+{
+    public static VideoCodec Extract(VideoFile file)
+    {
+        Console.WriteLine("CodecFactory: extracting codec");
+        return new MPEG4CompressionCodec();
+    }
+}
+
+public class BitrateReader
+{
+    public static string Read(VideoFile file, VideoCodec codec)
+    {
+        Console.WriteLine("BitrateReader: reading file");
+        return "buffer data";
+    }
+
+    public static string Convert(string buffer, VideoCodec codec)
+    {
+        Console.WriteLine("BitrateReader: converting buffer");
+        return "converted buffer";
+    }
+}
+
+// Facade - Simplified Interface
+public class VideoConverter
+{
+    public void Convert(string fileName, string format)
+    {
+        Console.WriteLine($"VideoConverter: conversion started for {fileName}");
+        
+        VideoFile file = new VideoFile(fileName);
+        VideoCodec sourceCodec = CodecFactory.Extract(file);
+        
+        VideoCodec destinationCodec = format == "mp4" 
+            ? new MPEG4CompressionCodec() 
+            : new OggCompressionCodec();
+        
+        string buffer = BitrateReader.Read(file, sourceCodec);
+        string result = BitrateReader.Convert(buffer, destinationCodec);
+        
+        new AudioMixer().Fix(file);
+        
+        Console.WriteLine("VideoConverter: conversion completed");
+    }
+}
+
+// Client Code - Simple Usage
+var converter = new VideoConverter();
+converter.Convert("funny-cats-video.ogg", "mp4");</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Implementation (Python)</h2>
+                    <pre><code class="language-python"># Complex Subsystem Classes
+class VideoFile:
+    def __init__(self, file_name: str):
+        self.file_name = file_name
+
+class AudioMixer:
+    def fix(self, file: VideoFile) -> None:
+        print(f"AudioMixer: fixing audio in {file.file_name}")
+
+class VideoCodec:
+    pass
+
+class MPEG4CompressionCodec(VideoCodec):
+    pass
+
+class OggCompressionCodec(VideoCodec):
+    pass
+
+class CodecFactory:
+    @staticmethod
+    def extract(file: VideoFile) -> VideoCodec:
+        print("CodecFactory: extracting codec")
+        return MPEG4CompressionCodec()
+
+class BitrateReader:
+    @staticmethod
+    def read(file: VideoFile, codec: VideoCodec) -> str:
+        print("BitrateReader: reading file")
+        return "buffer data"
+    
+    @staticmethod
+    def convert(buffer: str, codec: VideoCodec) -> str:
+        print("BitrateReader: converting buffer")
+        return "converted buffer"
+
+# Facade - Simplified Interface
+class VideoConverter:
+    def convert(self, file_name: str, format: str) -> None:
+        print(f"VideoConverter: conversion started for {file_name}")
+        
+        file = VideoFile(file_name)
+        source_codec = CodecFactory.extract(file)
+        
+        destination_codec = (MPEG4CompressionCodec() if format == "mp4" 
+                            else OggCompressionCodec())
+        
+        buffer = BitrateReader.read(file, source_codec)
+        result = BitrateReader.convert(buffer, destination_codec)
+        
+        AudioMixer().fix(file)
+        
+        print("VideoConverter: conversion completed")
+
+# Client Code - Simple Usage
+converter = VideoConverter()
+converter.convert("funny-cats-video.ogg", "mp4")</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Real-World Examples</h2>
+                    <ul>
+                        <li><strong>E-commerce Checkout:</strong> Facade yang menyederhanakan proses checkout dengan
+                            menangani inventory check, payment processing, shipping calculation, dan order creation</li>
+                        <li><strong>Compiler:</strong> Simple interface untuk compile code yang internally menangani
+                            lexical analysis, parsing, optimization, dan code generation</li>
+                        <li><strong>Database Layer:</strong> Repository pattern bertindak sebagai facade untuk complex
+                            database operations, caching, dan query optimization</li>
+                        <li><strong>API Gateway:</strong> Facade untuk microservices yang menyediakan unified interface
+                            ke multiple backend services</li>
+                    </ul>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Pros and Cons</h2>
+                    <div class="pros-cons-grid">
+                        <div class="pros">
+                            <h3><i class="fas fa-check-circle"></i> Pros</h3>
+                            <ul>
+                                <li>Isolates code dari complexity of subsystem</li>
+                                <li>Menyederhanakan penggunaan complex libraries atau frameworks</li>
+                                <li>Loose coupling antara client dan subsystem</li>
+                                <li>Easier testing dengan mocking facade daripada entire subsystem</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h3><i class="fas fa-times-circle"></i> Cons</h3>
+                            <ul>
+                                <li>Facade dapat menjadi "god object" yang coupled ke semua classes dalam aplikasi</li>
+                                <li>Menambahkan extra layer yang bisa mengurangi performance (minimal)</li>
+                                <li>Client yang butuh advanced features mungkin tidak mendapatkannya dari simplified
+                                    interface</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Facade vs Adapter</h2>
+                    <p><strong>Facade:</strong> Menyederhanakan interface ke existing complex system. Defines a new
+                        interface.</p>
+                    <p><strong>Adapter:</strong> Membuat dua existing interfaces bekerja sama. Uses existing interface.
+                    </p>
+                </section>
+
+                <div class="doc-navigation">
+                    <a href="bridge.html" class="nav-prev"><i class="fas fa-arrow-left"></i> Bridge</a>
+                    <a href="strategy.html" class="nav-next">Strategy <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </article>
+        </main>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                document.getElementById('sidebar').innerHTML = sidebarContent;
+                
+                // Re-run sidebar initialization from main.js
+                const event = new Event('sidebarLoaded');
+                document.dispatchEvent(event);
+            });
+    </script>
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                const sidebarElement = document.getElementById('sidebar');
+                
+                if (sidebarElement) {
+                    sidebarElement.innerHTML = sidebarContent;
+                    console.log('âœ… Sidebar loaded successfully');
+                    
+                    // Dispatch event after sidebar is loaded
+                    const event = new Event('sidebarLoaded');
+                    document.dispatchEvent(event);
+                } else {
+                    console.error('âŒ Sidebar element not found');
+                }
+            })
+            .catch(error => {
+                console.error('âŒ Error loading sidebar:', error);
+            });
+    </script>
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>

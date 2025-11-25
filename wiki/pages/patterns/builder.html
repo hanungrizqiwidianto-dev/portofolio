@@ -1,0 +1,481 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Builder Pattern - Hanung's Dev Wiki</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <a href="../../index.html" class="logo">
+                <i class="fas fa-code"></i>
+                <span>Hanung's Dev Wiki</span>
+            </a>
+        </div>
+        <nav class="header-nav">
+            <a href="../../index.html" class="nav-link">Home</a>
+            <a href="../content-list.html" class="nav-link">Content List</a>
+            <a href="../interesting.html" class="nav-link">Interesting Pages</a>
+            <a href="../projects.html" class="nav-link">Ongoing Projects</a>
+        </nav>
+        <div class="header-right">
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search...">
+            </div>
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </button>
+            <a href="https://github.com/hanungrizqiwidianto-dev" target="_blank" class="github-link">
+                <i class="fab fa-github"></i>
+                <span>86</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Sidebar (same as index.html - akan di-load via JavaScript) -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-section">
+                <a href="../../index.html" class="sidebar-item">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+            </div>
+            <!-- Sidebar content will be loaded -->
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="breadcrumb">
+                <a href="../../index.html">Home</a>
+                <span>/</span>
+                <a href="#">Design Patterns</a>
+                <span>/</span>
+                <span>Builder Pattern</span>
+            </div>
+
+            <article class="doc-article">
+                <h1>Builder Pattern</h1>
+                <div class="doc-meta">
+                    <span class="badge badge-creational">Creational Pattern</span>
+                    <span class="doc-date"><i class="fas fa-calendar"></i> Updated: Nov 25, 2025</span>
+                </div>
+
+                <section class="doc-section">
+                    <h2>Overview</h2>
+                    <p>
+                        The Builder pattern is a creational design pattern that lets you construct complex objects step
+                        by step.
+                        The pattern allows you to produce different types and representations of an object using the
+                        same construction code.
+                    </p>
+                    <div class="info-box">
+                        <i class="fas fa-lightbulb"></i>
+                        <div>
+                            <strong>When to use:</strong> When you need to create an object with many optional
+                            parameters or
+                            when the construction process must allow different representations of the object being
+                            constructed.
+                        </div>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Problem</h2>
+                    <p>
+                        Imagine a complex object that requires laborious, step-by-step initialization of many fields and
+                        nested objects.
+                        Such initialization code is usually buried inside a monstrous constructor with lots of
+                        parameters.
+                        Or even worse: scattered all over the client code.
+                    </p>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Solution</h2>
+                    <p>
+                        The Builder pattern suggests that you extract the object construction code out of its own class
+                        and move it to
+                        separate objects called builders. The pattern organizes object construction into a set of steps.
+                    </p>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Structure</h2>
+                    <div class="structure-diagram">
+                        <pre>
+┌─────────────────┐
+│    Director     │
+├─────────────────┤
+│ + construct()   │
+└────────┬────────┘
+         │ uses
+         ▼
+┌─────────────────┐
+│    Builder      │◄─────────────┐
+├─────────────────┤              │
+│ + buildPartA()  │              │
+│ + buildPartB()  │              │
+│ + getResult()   │              │
+└─────────────────┘              │
+         △                       │
+         │ implements             │
+         │                        │
+┌────────┴────────┐              │
+│ ConcreteBuilder │──────────────┘
+├─────────────────┤    creates
+│ + buildPartA()  │
+│ + buildPartB()  │
+│ + getResult()   │
+└─────────────────┘
+         │
+         │ produces
+         ▼
+┌─────────────────┐
+│    Product      │
+└─────────────────┘
+                        </pre>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Implementation in C#</h2>
+
+                    <h3>Product Class</h3>
+                    <pre><code class="language-csharp">public class House
+{
+    public int Rooms { get; set; }
+    public int Floors { get; set; }
+    public bool HasGarage { get; set; }
+    public bool HasSwimmingPool { get; set; }
+    public bool HasGarden { get; set; }
+    
+    public override string ToString()
+    {
+        return $"House with {Rooms} rooms, {Floors} floors, " +
+               $"Garage: {HasGarage}, Pool: {HasSwimmingPool}, Garden: {HasGarden}";
+    }
+}</code></pre>
+
+                    <h3>Builder Interface</h3>
+                    <pre><code class="language-csharp">public interface IHouseBuilder
+{
+    void Reset();
+    void SetRooms(int rooms);
+    void SetFloors(int floors);
+    void BuildGarage();
+    void BuildSwimmingPool();
+    void BuildGarden();
+    House GetResult();
+}</code></pre>
+
+                    <h3>Concrete Builder</h3>
+                    <pre><code class="language-csharp">public class ModernHouseBuilder : IHouseBuilder
+{
+    private House _house;
+    
+    public ModernHouseBuilder()
+    {
+        Reset();
+    }
+    
+    public void Reset()
+    {
+        _house = new House();
+    }
+    
+    public void SetRooms(int rooms)
+    {
+        _house.Rooms = rooms;
+    }
+    
+    public void SetFloors(int floors)
+    {
+        _house.Floors = floors;
+    }
+    
+    public void BuildGarage()
+    {
+        _house.HasGarage = true;
+    }
+    
+    public void BuildSwimmingPool()
+    {
+        _house.HasSwimmingPool = true;
+    }
+    
+    public void BuildGarden()
+    {
+        _house.HasGarden = true;
+    }
+    
+    public House GetResult()
+    {
+        House result = _house;
+        Reset();
+        return result;
+    }
+}</code></pre>
+
+                    <h3>Director (Optional)</h3>
+                    <pre><code class="language-csharp">public class HouseDirector
+{
+    private IHouseBuilder _builder;
+    
+    public HouseDirector(IHouseBuilder builder)
+    {
+        _builder = builder;
+    }
+    
+    public void ConstructLuxuryHouse()
+    {
+        _builder.Reset();
+        _builder.SetRooms(10);
+        _builder.SetFloors(3);
+        _builder.BuildGarage();
+        _builder.BuildSwimmingPool();
+        _builder.BuildGarden();
+    }
+    
+    public void ConstructSimpleHouse()
+    {
+        _builder.Reset();
+        _builder.SetRooms(3);
+        _builder.SetFloors(1);
+    }
+}</code></pre>
+
+                    <h3>Usage</h3>
+                    <pre><code class="language-csharp">// Without Director
+var builder = new ModernHouseBuilder();
+builder.SetRooms(5);
+builder.SetFloors(2);
+builder.BuildGarage();
+builder.BuildGarden();
+House house1 = builder.GetResult();
+
+// With Director
+var director = new HouseDirector(builder);
+director.ConstructLuxuryHouse();
+House luxuryHouse = builder.GetResult();
+
+director.ConstructSimpleHouse();
+House simpleHouse = builder.GetResult();
+
+Console.WriteLine(house1);
+Console.WriteLine(luxuryHouse);
+Console.WriteLine(simpleHouse);</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Implementation in Python</h2>
+
+                    <pre><code class="language-python">from abc import ABC, abstractmethod
+
+class House:
+    def __init__(self):
+        self.rooms = 0
+        self.floors = 0
+        self.has_garage = False
+        self.has_swimming_pool = False
+        self.has_garden = False
+    
+    def __str__(self):
+        return (f"House with {self.rooms} rooms, {self.floors} floors, "
+                f"Garage: {self.has_garage}, Pool: {self.has_swimming_pool}, "
+                f"Garden: {self.has_garden}")
+
+class HouseBuilder(ABC):
+    @abstractmethod
+    def reset(self):
+        pass
+    
+    @abstractmethod
+    def set_rooms(self, rooms: int):
+        pass
+    
+    @abstractmethod
+    def set_floors(self, floors: int):
+        pass
+    
+    @abstractmethod
+    def build_garage(self):
+        pass
+    
+    @abstractmethod
+    def build_swimming_pool(self):
+        pass
+    
+    @abstractmethod
+    def build_garden(self):
+        pass
+    
+    @abstractmethod
+    def get_result(self) -> House:
+        pass
+
+class ModernHouseBuilder(HouseBuilder):
+    def __init__(self):
+        self.reset()
+    
+    def reset(self):
+        self._house = House()
+    
+    def set_rooms(self, rooms: int):
+        self._house.rooms = rooms
+        return self
+    
+    def set_floors(self, floors: int):
+        self._house.floors = floors
+        return self
+    
+    def build_garage(self):
+        self._house.has_garage = True
+        return self
+    
+    def build_swimming_pool(self):
+        self._house.has_swimming_pool = True
+        return self
+    
+    def build_garden(self):
+        self._house.has_garden = True
+        return self
+    
+    def get_result(self) -> House:
+        result = self._house
+        self.reset()
+        return result
+
+# Usage with method chaining
+builder = ModernHouseBuilder()
+house = (builder
+         .set_rooms(5)
+         .set_floors(2)
+         .build_garage()
+         .build_garden()
+         .get_result())
+
+print(house)</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Pros and Cons</h2>
+
+                    <div class="pros-cons-grid">
+                        <div class="pros-box">
+                            <h3><i class="fas fa-check-circle"></i> Advantages</h3>
+                            <ul>
+                                <li>You can construct objects step-by-step, defer construction steps or run steps
+                                    recursively</li>
+                                <li>You can reuse the same construction code when building various representations of
+                                    products</li>
+                                <li>Single Responsibility Principle - You can isolate complex construction code from
+                                    business logic</li>
+                                <li>Eliminates "telescoping constructor" anti-pattern</li>
+                            </ul>
+                        </div>
+                        <div class="cons-box">
+                            <h3><i class="fas fa-times-circle"></i> Disadvantages</h3>
+                            <ul>
+                                <li>The overall complexity of the code increases since the pattern requires creating
+                                    multiple new classes</li>
+                                <li>May be overkill for simple objects</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Real-World Examples</h2>
+                    <ul>
+                        <li><strong>StringBuilder in .NET</strong> - Building strings step by step</li>
+                        <li><strong>SQL Query Builders</strong> - Constructing complex SQL queries</li>
+                        <li><strong>HTTP Request Builders</strong> - Building HTTP requests with various parameters</li>
+                        <li><strong>Document Builders</strong> - Creating PDF, HTML, or XML documents</li>
+                    </ul>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Related Patterns</h2>
+                    <ul>
+                        <li><strong>Abstract Factory:</strong> Can be used with Builder to create complex object
+                            families</li>
+                        <li><strong>Composite:</strong> Builder can be used to construct Composite trees</li>
+                        <li><strong>Prototype:</strong> Can be used instead of Builder when copying complex objects</li>
+                    </ul>
+                </section>
+
+                <div class="doc-navigation">
+                    <a href="abstract-factory.html" class="nav-prev">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Abstract Factory</span>
+                    </a>
+                    <a href="singleton.html" class="nav-next">
+                        <span>Singleton</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </article>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                document.getElementById('sidebar').innerHTML = sidebarContent;
+                
+                // Re-run sidebar initialization from main.js
+                const event = new Event('sidebarLoaded');
+                document.dispatchEvent(event);
+            });
+    </script>
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                const sidebarElement = document.getElementById('sidebar');
+                
+                if (sidebarElement) {
+                    sidebarElement.innerHTML = sidebarContent;
+                    console.log('âœ… Sidebar loaded successfully');
+                    
+                    // Dispatch event after sidebar is loaded
+                    const event = new Event('sidebarLoaded');
+                    document.dispatchEvent(event);
+                } else {
+                    console.error('âŒ Sidebar element not found');
+                }
+            })
+            .catch(error => {
+                console.error('âŒ Error loading sidebar:', error);
+            });
+    </script>
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>

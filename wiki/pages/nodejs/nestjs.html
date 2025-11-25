@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NestJS Framework - Node.js Development</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div id="sidebarContainer"></div>
+
+    <div class="container">
+        <main class="content">
+            <div class="page-header">
+                <div class="breadcrumb">
+                    <a href="../../index.html">Home</a>
+                    <span>/</span>
+                    <a href="#">Node.js Development</a>
+                    <span>/</span>
+                    <span>NestJS Framework</span>
+                </div>
+                <h1><i class="fas fa-cube"></i> NestJS - Progressive Node.js Framework</h1>
+                <p class="page-description">Build efficient, scalable enterprise-grade applications with NestJS - a
+                    TypeScript-first framework inspired by Angular.</p>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-rocket"></i> Project Setup</h2>
+                <pre><code># Install NestJS CLI
+npm install -g @nestjs/cli
+
+# Create new project
+nest new my-project
+
+# Navigate to project
+cd my-project
+
+# Run development server
+npm run start:dev
+
+# Project structure:
+src/
+├── app.controller.ts       # Basic controller
+├── app.controller.spec.ts  # Tests
+├── app.module.ts           # Root module
+├── app.service.ts          # Service
+└── main.ts                 # Entry point</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-code"></i> Controllers</h2>
+                <pre><code>import { Controller, Get, Post, Put, Delete, Body, Param, Query } from '@nestjs/common';
+
+@Controller('users')
+export class UsersController {
+    constructor(private readonly usersService: UsersService) {}
+    
+    // GET /users
+    @Get()
+    findAll(@Query() query: FindUsersDto) {
+        return this.usersService.findAll(query);
+    }
+    
+    // GET /users/:id
+    @Get(':id')
+    findOne(@Param('id') id: string) {
+        return this.usersService.findOne(+id);
+    }
+    
+    // POST /users
+    @Post()
+    create(@Body() createUserDto: CreateUserDto) {
+        return this.usersService.create(createUserDto);
+    }
+    
+    // PUT /users/:id
+    @Put(':id')
+    update(
+        @Param('id') id: string,
+        @Body() updateUserDto: UpdateUserDto
+    ) {
+        return this.usersService.update(+id, updateUserDto);
+    }
+    
+    // DELETE /users/:id
+    @Delete(':id')
+    remove(@Param('id') id: string) {
+        return this.usersService.remove(+id);
+    }
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-cogs"></i> Services & Providers</h2>
+                <pre><code>import { Injectable, NotFoundException } from '@nestjs/common';
+
+@Injectable()
+export class UsersService {
+    private users = [
+        { id: 1, name: 'John', email: 'john@example.com' },
+        { id: 2, name: 'Jane', email: 'jane@example.com' }
+    ];
+    
+    findAll(query: FindUsersDto) {
+        let filtered = this.users;
+        
+        if (query.search) {
+            filtered = filtered.filter(u =>
+                u.name.includes(query.search) ||
+                u.email.includes(query.search)
+            );
+        }
+        
+        return {
+            data: filtered,
+            total: filtered.length
+        };
+    }
+    
+    findOne(id: number) {
+        const user = this.users.find(u => u.id === id);
+        
+        if (!user) {
+            throw new NotFoundException(`User with ID ${id} not found`);
+        }
+        
+        return user;
+    }
+    
+    create(createUserDto: CreateUserDto) {
+        const newUser = {
+            id: this.users.length + 1,
+            ...createUserDto
+        };
+        
+        this.users.push(newUser);
+        return newUser;
+    }
+    
+    update(id: number, updateUserDto: UpdateUserDto) {
+        const index = this.users.findIndex(u => u.id === id);
+        
+        if (index === -1) {
+            throw new NotFoundException(`User with ID ${id} not found`);
+        }
+        
+        this.users[index] = { ...this.users[index], ...updateUserDto };
+        return this.users[index];
+    }
+    
+    remove(id: number) {
+        const index = this.users.findIndex(u => u.id === id);
+        
+        if (index === -1) {
+            throw new NotFoundException(`User with ID ${id} not found`);
+        }
+        
+        this.users.splice(index, 1);
+        return { message: 'User deleted successfully' };
+    }
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-check-square"></i> DTOs & Validation</h2>
+                <pre><code>// Install class-validator and class-transformer
+// npm install class-validator class-transformer
+
+import { IsEmail, IsNotEmpty, IsOptional, Min, Max } from 'class-validator';
+
+export class CreateUserDto {
+    @IsNotEmpty()
+    name: string;
+    
+    @IsEmail()
+    email: string;
+    
+    @IsOptional()
+    @Min(0)
+    @Max(150)
+    age?: number;
+}
+
+export class UpdateUserDto {
+    @IsOptional()
+    name?: string;
+    
+    @IsOptional()
+    @IsEmail()
+    email?: string;
+    
+    @IsOptional()
+    @Min(0)
+    @Max(150)
+    age?: number;
+}
+
+export class FindUsersDto {
+    @IsOptional()
+    search?: string;
+    
+    @IsOptional()
+    @Min(1)
+    page?: number = 1;
+    
+    @IsOptional()
+    @Min(1)
+    @Max(100)
+    limit?: number = 10;
+}
+
+// Enable validation in main.ts
+import { ValidationPipe } from '@nestjs/common';
+
+async function bootstrap() {
+    const app = await NestFactory.create(AppModule);
+    
+    app.useGlobalPipes(new ValidationPipe({
+        whitelist: true,          // Strip non-DTO properties
+        forbidNonWhitelisted: true, // Throw error for non-DTO properties
+        transform: true,           // Auto-transform to DTO instances
+    }));
+    
+    await app.listen(3000);
+}
+bootstrap();</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-puzzle-piece"></i> Modules</h2>
+                <pre><code>// users.module.ts
+import { Module } from '@nestjs/common';
+import { UsersController } from './users.controller';
+import { UsersService } from './users.service';
+
+@Module({
+    controllers: [UsersController],
+    providers: [UsersService],
+    exports: [UsersService] // Export to use in other modules
+})
+export class UsersModule {}
+
+// app.module.ts
+import { Module } from '@nestjs/common';
+import { UsersModule } from './users/users.module';
+import { PostsModule } from './posts/posts.module';
+
+@Module({
+    imports: [
+        UsersModule,
+        PostsModule,
+    ],
+})
+export class AppModule {}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-shield-alt"></i> Guards & Authentication</h2>
+                <pre><code>// auth.guard.ts
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Observable } from 'rxjs';
+
+@Injectable()
+export class AuthGuard implements CanActivate {
+    canActivate(
+        context: ExecutionContext,
+    ): boolean | Promise<boolean> | Observable<boolean> {
+        const request = context.switchToHttp().getRequest();
+        const token = request.headers['authorization'];
+        
+        if (!token) {
+            return false;
+        }
+        
+        // Validate token
+        return this.validateToken(token);
+    }
+    
+    private validateToken(token: string): boolean {
+        // Implement token validation
+        return token === 'Bearer valid-token';
+    }
+}
+
+// Use guard in controller
+import { UseGuards } from '@nestjs/common';
+
+@Controller('protected')
+@UseGuards(AuthGuard)
+export class ProtectedController {
+    @Get()
+    getProtectedData() {
+        return { message: 'Protected data' };
+    }
+}
+
+// JWT Authentication
+// npm install @nestjs/jwt @nestjs/passport passport passport-jwt
+
+import { Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+
+@Injectable()
+export class AuthService {
+    constructor(private jwtService: JwtService) {}
+    
+    async login(user: any) {
+        const payload = { username: user.username, sub: user.userId };
+        
+        return {
+            access_token: this.jwtService.sign(payload),
+        };
+    }
+    
+    async validateUser(username: string, password: string): Promise<any> {
+        // Validate user credentials
+        const user = await this.usersService.findByUsername(username);
+        
+        if (user && user.password === password) {
+            const { password, ...result } = user;
+            return result;
+        }
+        
+        return null;
+    }
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-filter"></i> Interceptors</h2>
+                <pre><code>import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+// Transform response
+@Injectable()
+export class TransformInterceptor<T> implements NestInterceptor<T, any> {
+    intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+        return next.handle().pipe(
+            map(data => ({
+                success: true,
+                timestamp: new Date().toISOString(),
+                data
+            }))
+        );
+    }
+}
+
+// Logging interceptor
+@Injectable()
+export class LoggingInterceptor implements NestInterceptor {
+    intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+        const request = context.switchToHttp().getRequest();
+        const { method, url } = request;
+        const now = Date.now();
+        
+        console.log(`${method} ${url} - Start`);
+        
+        return next.handle().pipe(
+            map(data => {
+                console.log(`${method} ${url} - ${Date.now() - now}ms`);
+                return data;
+            })
+        );
+    }
+}
+
+// Use globally in main.ts
+app.useGlobalInterceptors(new TransformInterceptor());</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-database"></i> TypeORM Integration</h2>
+                <pre><code>// npm install @nestjs/typeorm typeorm pg
+
+// app.module.ts
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
+@Module({
+    imports: [
+        TypeOrmModule.forRoot({
+            type: 'postgres',
+            host: 'localhost',
+            port: 5432,
+            username: 'postgres',
+            password: 'password',
+            database: 'mydb',
+            entities: [__dirname + '/**/*.entity{.ts,.js}'],
+            synchronize: true, // Don't use in production!
+        }),
+        UsersModule,
+    ],
+})
+export class AppModule {}
+
+// user.entity.ts
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+
+@Entity()
+export class User {
+    @PrimaryGeneratedColumn()
+    id: number;
+    
+    @Column()
+    name: string;
+    
+    @Column({ unique: true })
+    email: string;
+    
+    @Column({ nullable: true })
+    age: number;
+}
+
+// users.module.ts
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from './user.entity';
+import { UsersService } from './users.service';
+import { UsersController } from './users.controller';
+
+@Module({
+    imports: [TypeOrmModule.forFeature([User])],
+    providers: [UsersService],
+    controllers: [UsersController],
+})
+export class UsersModule {}
+
+// users.service.ts with TypeORM
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from './user.entity';
+
+@Injectable()
+export class UsersService {
+    constructor(
+        @InjectRepository(User)
+        private usersRepository: Repository<User>,
+    ) {}
+    
+    findAll(): Promise<User[]> {
+        return this.usersRepository.find();
+    }
+    
+    findOne(id: number): Promise<User> {
+        return this.usersRepository.findOneBy({ id });
+    }
+    
+    create(createUserDto: CreateUserDto): Promise<User> {
+        const user = this.usersRepository.create(createUserDto);
+        return this.usersRepository.save(user);
+    }
+    
+    async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+        await this.usersRepository.update(id, updateUserDto);
+        return this.findOne(id);
+    }
+    
+    async remove(id: number): Promise<void> {
+        await this.usersRepository.delete(id);
+    }
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-check-circle"></i> Best Practices</h2>
+                <div class="tip-box">
+                    <ul>
+                        <li>✅ Use DTOs for data validation and transformation</li>
+                        <li>✅ Leverage dependency injection for loose coupling</li>
+                        <li>✅ Organize code by feature modules</li>
+                        <li>✅ Use guards for authentication and authorization</li>
+                        <li>✅ Implement interceptors for cross-cutting concerns</li>
+                        <li>✅ Use pipes for data transformation and validation</li>
+                        <li>✅ Write unit and e2e tests</li>
+                        <li>✅ Use environment variables for configuration</li>
+                        <li>✅ Enable TypeScript strict mode</li>
+                        <li>✅ Follow SOLID principles</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="navigation-links">
+                <a href="express.html" class="nav-link"><i class="fas fa-arrow-left"></i> Previous: Express.js</a>
+                <a href="async-patterns.html" class="nav-link">Next: Async Patterns <i
+                        class="fas fa-arrow-right"></i></a>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebar = doc.querySelector('.sidebar');
+                if (sidebar) {
+                    document.getElementById('sidebarContainer').appendChild(sidebar);
+                    const event = new Event('sidebarLoaded');
+                    document.dispatchEvent(event);
+                }
+            });
+    </script>
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,349 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bridge Pattern - Developer Wiki</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+
+<body>
+    <div class="wiki-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-book"></i> Wiki</h2>
+                <button class="close-sidebar" id="closeSidebar"><i class="fas fa-times"></i></button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="../../index.html"><i class="fas fa-home"></i> Home</a>
+                <a href="../getting-started.html"><i class="fas fa-rocket"></i> Getting Started</a>
+
+                <div class="sidebar-section">
+                    <h3 class="section-header"><i class="fas fa-shapes"></i> Design Patterns</h3>
+                    <div class="sidebar-submenu">
+                        <div class="submenu-category">
+                            <h4>Creational</h4>
+                            <a href="builder.html">Builder</a>
+                            <a href="factory-method.html">Factory Method</a>
+                            <a href="singleton.html">Singleton</a>
+                            <a href="abstract-factory.html">Abstract Factory</a>
+                        </div>
+                        <div class="submenu-category">
+                            <h4>Structural</h4>
+                            <a href="adapter.html">Adapter</a>
+                            <a href="bridge.html" class="active">Bridge</a>
+                            <a href="decorator.html">Decorator</a>
+                            <a href="facade.html">Facade</a>
+                        </div>
+                        <div class="submenu-category">
+                            <h4>Behavioral</h4>
+                            <a href="strategy.html">Strategy</a>
+                            <a href="template-method.html">Template Method</a>
+                            <a href="command.html">Command</a>
+                            <a href="mediator.html">Mediator</a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <button class="toggle-sidebar" id="toggleSidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <article class="doc-article">
+                <div class="breadcrumb">
+                    <a href="../../index.html">Home</a> / <a href="../../index.html#patterns">Design Patterns</a> /
+                    Bridge
+                </div>
+
+                <h1>Bridge Pattern</h1>
+                <div class="doc-meta">
+                    <span class="badge badge-structural">Structural</span>
+                    <span class="badge badge-intermediate">Intermediate</span>
+                </div>
+
+                <section class="doc-section">
+                    <h2>Overview</h2>
+                    <p>Bridge pattern memisahkan abstraction dari implementation-nya sehingga keduanya dapat berubah
+                        secara independen. Pattern ini menggunakan composition over inheritance untuk menghindari class
+                        explosion.</p>
+
+                    <div class="info-box">
+                        <strong>Analogi:</strong> Seperti remote control (abstraction) yang dapat bekerja dengan
+                        berbagai perangkat elektronik (implementations). Remote control dan perangkat dapat berkembang
+                        secara terpisah tanpa saling bergantung.
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Problem</h2>
+                    <p>Ketika Anda memiliki class hierarchy yang tumbuh dalam dua dimensi independen (misalnya: Shape ×
+                        Color, atau Device × Remote), inheritance murni akan menyebabkan class explosion. Menambahkan
+                        varian baru memerlukan pembuatan banyak subclass baru.</p>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Solution</h2>
+                    <p>Pisahkan hierarki menjadi dua bagian: abstraction (interface tingkat tinggi) dan implementation
+                        (platform-specific code). Abstraction memiliki reference ke implementation object dan
+                        mendelegasikan pekerjaan ke implementation tersebut.</p>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Implementation (C#)</h2>
+                    <pre><code class="language-csharp">// Implementation Interface
+public interface IMessageSender
+{
+    void SendMessage(string message);
+}
+
+// Concrete Implementations
+public class EmailSender : IMessageSender
+{
+    public void SendMessage(string message)
+    {
+        Console.WriteLine($"[EMAIL] Sending: {message}");
+    }
+}
+
+public class SmsSender : IMessageSender
+{
+    public void SendMessage(string message)
+    {
+        Console.WriteLine($"[SMS] Sending: {message}");
+    }
+}
+
+public class SlackSender : IMessageSender
+{
+    public void SendMessage(string message)
+    {
+        Console.WriteLine($"[SLACK] Sending: {message}");
+    }
+}
+
+// Abstraction
+public abstract class Message
+{
+    protected IMessageSender _sender;
+
+    protected Message(IMessageSender sender)
+    {
+        _sender = sender;
+    }
+
+    public abstract void Send();
+}
+
+// Refined Abstractions
+public class TextMessage : Message
+{
+    private string _content;
+
+    public TextMessage(IMessageSender sender, string content) : base(sender)
+    {
+        _content = content;
+    }
+
+    public override void Send()
+    {
+        _sender.SendMessage(_content);
+    }
+}
+
+public class UrgentMessage : Message
+{
+    private string _content;
+
+    public UrgentMessage(IMessageSender sender, string content) : base(sender)
+    {
+        _content = content;
+    }
+
+    public override void Send()
+    {
+        _sender.SendMessage($"🚨 URGENT: {_content}");
+    }
+}
+
+// Usage
+var emailSender = new EmailSender();
+var smsSender = new SmsSender();
+
+var normalEmail = new TextMessage(emailSender, "Hello!");
+normalEmail.Send(); // [EMAIL] Sending: Hello!
+
+var urgentSms = new UrgentMessage(smsSender, "Server down!");
+urgentSms.Send(); // [SMS] Sending: 🚨 URGENT: Server down!</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Implementation (Python)</h2>
+                    <pre><code class="language-python">from abc import ABC, abstractmethod
+
+# Implementation Interface
+class IMessageSender(ABC):
+    @abstractmethod
+    def send_message(self, message: str) -> None:
+        pass
+
+# Concrete Implementations
+class EmailSender(IMessageSender):
+    def send_message(self, message: str) -> None:
+        print(f"[EMAIL] Sending: {message}")
+
+class SmsSender(IMessageSender):
+    def send_message(self, message: str) -> None:
+        print(f"[SMS] Sending: {message}")
+
+class SlackSender(IMessageSender):
+    def send_message(self, message: str) -> None:
+        print(f"[SLACK] Sending: {message}")
+
+# Abstraction
+class Message(ABC):
+    def __init__(self, sender: IMessageSender):
+        self._sender = sender
+    
+    @abstractmethod
+    def send(self) -> None:
+        pass
+
+# Refined Abstractions
+class TextMessage(Message):
+    def __init__(self, sender: IMessageSender, content: str):
+        super().__init__(sender)
+        self._content = content
+    
+    def send(self) -> None:
+        self._sender.send_message(self._content)
+
+class UrgentMessage(Message):
+    def __init__(self, sender: IMessageSender, content: str):
+        super().__init__(sender)
+        self._content = content
+    
+    def send(self) -> None:
+        self._sender.send_message(f"🚨 URGENT: {self._content}")
+
+# Usage
+email_sender = EmailSender()
+sms_sender = SmsSender()
+
+normal_email = TextMessage(email_sender, "Hello!")
+normal_email.send()  # [EMAIL] Sending: Hello!
+
+urgent_sms = UrgentMessage(sms_sender, "Server down!")
+urgent_sms.send()  # [SMS] Sending: 🚨 URGENT: Server down!</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Real-World Examples</h2>
+                    <ul>
+                        <li><strong>UI Components:</strong> Abstraction (Button, Window) dapat bekerja dengan berbagai
+                            rendering APIs (OpenGL, DirectX, Metal)</li>
+                        <li><strong>Database Drivers:</strong> Database abstraction layer dapat bekerja dengan berbagai
+                            database engines</li>
+                        <li><strong>Notification Systems:</strong> Notification types (Normal, Urgent, Scheduled) dapat
+                            dikirim via berbagai channels (Email, SMS, Push, Slack)</li>
+                        <li><strong>Payment Processing:</strong> Payment methods (CreditCard, DebitCard, Wallet) dapat
+                            diproses via berbagai gateways</li>
+                    </ul>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Pros and Cons</h2>
+                    <div class="pros-cons-grid">
+                        <div class="pros">
+                            <h3><i class="fas fa-check-circle"></i> Pros</h3>
+                            <ul>
+                                <li>Platform-independent abstractions yang dapat bekerja dengan berbagai implementations
+                                </li>
+                                <li>Menghindari class explosion dari multiple inheritance dimensions</li>
+                                <li>Open/Closed Principle - dapat menambahkan abstractions dan implementations secara
+                                    independen</li>
+                                <li>Single Responsibility - abstraction fokus pada high-level logic, implementation pada
+                                    platform details</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h3><i class="fas fa-times-circle"></i> Cons</h3>
+                            <ul>
+                                <li>Meningkatkan complexity dengan memisahkan hierarchy menjadi dua bagian</li>
+                                <li>Overkill untuk aplikasi sederhana dengan satu dimensi variasi saja</li>
+                                <li>Memerlukan pemahaman yang baik tentang kapan harus memisahkan concerns</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Bridge vs Adapter</h2>
+                    <p><strong>Bridge:</strong> Designed up-front untuk memisahkan abstraction dari implementation sejak
+                        awal desain.</p>
+                    <p><strong>Adapter:</strong> Digunakan setelah sistem dibuat untuk membuat incompatible interfaces
+                        bekerja sama.</p>
+                </section>
+
+                <div class="doc-navigation">
+                    <a href="adapter.html" class="nav-prev"><i class="fas fa-arrow-left"></i> Adapter</a>
+                    <a href="decorator.html" class="nav-next">Decorator <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </article>
+        </main>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                document.getElementById('sidebar').innerHTML = sidebarContent;
+                
+                // Re-run sidebar initialization from main.js
+                const event = new Event('sidebarLoaded');
+                document.dispatchEvent(event);
+            });
+    </script>
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                const sidebarElement = document.getElementById('sidebar');
+                
+                if (sidebarElement) {
+                    sidebarElement.innerHTML = sidebarContent;
+                    console.log('âœ… Sidebar loaded successfully');
+                    
+                    // Dispatch event after sidebar is loaded
+                    const event = new Event('sidebarLoaded');
+                    document.dispatchEvent(event);
+                } else {
+                    console.error('âŒ Sidebar element not found');
+                }
+            })
+            .catch(error => {
+                console.error('âŒ Error loading sidebar:', error);
+            });
+    </script>
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>

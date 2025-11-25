@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Channels & Select - Go Development</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div id="sidebarContainer"></div>
+
+    <div class="container">
+        <main class="content">
+            <div class="page-header">
+                <div class="breadcrumb">
+                    <a href="../../index.html">Home</a>
+                    <span>/</span>
+                    <a href="#">Go Development</a>
+                    <span>/</span>
+                    <span>Channels & Select</span>
+                </div>
+                <h1><i class="fas fa-exchange-alt"></i> Channels & Select</h1>
+                <p class="page-description">Learn Go's powerful channel system for goroutine communication and the
+                    select statement for multiplexing channels.</p>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-info-circle"></i> Understanding Channels</h2>
+                <p>Channels are typed conduits for communication between goroutines. They follow the principle:
+                    <strong>"Don't communicate by sharing memory; share memory by communicating."</strong></p>
+
+                <div class="info-box">
+                    <strong>Channel Types:</strong>
+                    <ul>
+                        <li><strong>Unbuffered:</strong> Sender blocks until receiver reads
+                            (<code>make(chan Type)</code>)</li>
+                        <li><strong>Buffered:</strong> Sender blocks only when buffer is full
+                            (<code>make(chan Type, capacity)</code>)</li>
+                        <li><strong>Directional:</strong> Send-only (<code>chan<- Type</code>) or receive-only
+                            (<code><-chan Type</code>)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-code"></i> Basic Channel Operations</h2>
+                <pre><code>package main
+
+import "fmt"
+
+func main() {
+    // Create unbuffered channel
+    messages := make(chan string)
+    
+    // Send value (in goroutine to avoid deadlock)
+    go func() {
+        messages <- "Hello, Channel!"
+    }()
+    
+    // Receive value
+    msg := <-messages
+    fmt.Println(msg)
+    
+    // Buffered channel
+    buffered := make(chan int, 2)
+    buffered <- 1
+    buffered <- 2
+    // buffered <- 3 // Would block - buffer full
+    
+    fmt.Println(<-buffered) // 1
+    fmt.Println(<-buffered) // 2
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-toggle-on"></i> Closing Channels</h2>
+                <p>Close channels to signal no more values will be sent:</p>
+
+                <pre><code>package main
+
+import "fmt"
+
+func producer(ch chan<- int) {
+    for i := 0; i < 5; i++ {
+        ch <- i
+    }
+    close(ch) // Signal completion
+}
+
+func main() {
+    ch := make(chan int)
+    
+    go producer(ch)
+    
+    // Range automatically exits when channel closes
+    for value := range ch {
+        fmt.Println("Received:", value)
+    }
+    
+    // Check if channel is closed
+    value, ok := <-ch
+    if !ok {
+        fmt.Println("Channel is closed")
+    }
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-random"></i> Select Statement</h2>
+                <p>The <code>select</code> statement lets you wait on multiple channel operations:</p>
+
+                <pre><code>package main
+
+import (
+    "fmt"
+    "time"
+)
+
+func main() {
+    ch1 := make(chan string)
+    ch2 := make(chan string)
+    
+    go func() {
+        time.Sleep(1 * time.Second)
+        ch1 <- "Message from channel 1"
+    }()
+    
+    go func() {
+        time.Sleep(2 * time.Second)
+        ch2 <- "Message from channel 2"
+    }()
+    
+    // Wait for both channels
+    for i := 0; i < 2; i++ {
+        select {
+        case msg1 := <-ch1:
+            fmt.Println(msg1)
+        case msg2 := <-ch2:
+            fmt.Println(msg2)
+        }
+    }
+}
+
+// Select with timeout
+func selectWithTimeout() {
+    ch := make(chan string)
+    
+    select {
+    case msg := <-ch:
+        fmt.Println(msg)
+    case <-time.After(1 * time.Second):
+        fmt.Println("Timeout!")
+    }
+}
+
+// Non-blocking select
+func nonBlocking(ch chan string) {
+    select {
+    case msg := <-ch:
+        fmt.Println("Received:", msg)
+    default:
+        fmt.Println("No message available")
+    }
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-project-diagram"></i> Advanced Patterns</h2>
+
+                <h3>1. Fan-Out, Fan-In Pattern</h3>
+                <pre><code>package main
+
+import (
+    "fmt"
+    "sync"
+)
+
+// Fan-out: distribute work to multiple workers
+func fanOut(input <-chan int, numWorkers int) []<-chan int {
+    channels := make([]<-chan int, numWorkers)
+    
+    for i := 0; i < numWorkers; i++ {
+        ch := make(chan int)
+        channels[i] = ch
+        
+        go func(out chan<- int) {
+            defer close(out)
+            for n := range input {
+                // Process work
+                out <- n * 2
+            }
+        }(ch)
+    }
+    
+    return channels
+}
+
+// Fan-in: merge multiple channels into one
+func fanIn(channels ...<-chan int) <-chan int {
+    out := make(chan int)
+    var wg sync.WaitGroup
+    
+    for _, ch := range channels {
+        wg.Add(1)
+        go func(c <-chan int) {
+            defer wg.Done()
+            for n := range c {
+                out <- n
+            }
+        }(ch)
+    }
+    
+    go func() {
+        wg.Wait()
+        close(out)
+    }()
+    
+    return out
+}
+
+func main() {
+    input := make(chan int)
+    
+    // Send data
+    go func() {
+        for i := 1; i <= 10; i++ {
+            input <- i
+        }
+        close(input)
+    }()
+    
+    // Fan-out to 3 workers
+    workers := fanOut(input, 3)
+    
+    // Fan-in results
+    results := fanIn(workers...)
+    
+    // Collect results
+    for result := range results {
+        fmt.Println(result)
+    }
+}</code></pre>
+
+                <h3>2. Pipeline Pattern</h3>
+                <pre><code>package main
+
+import "fmt"
+
+// Stage 1: Generate numbers
+func generator(nums ...int) <-chan int {
+    out := make(chan int)
+    go func() {
+        defer close(out)
+        for _, n := range nums {
+            out <- n
+        }
+    }()
+    return out
+}
+
+// Stage 2: Square numbers
+func square(in <-chan int) <-chan int {
+    out := make(chan int)
+    go func() {
+        defer close(out)
+        for n := range in {
+            out <- n * n
+        }
+    }()
+    return out
+}
+
+// Stage 3: Filter even numbers
+func filterEven(in <-chan int) <-chan int {
+    out := make(chan int)
+    go func() {
+        defer close(out)
+        for n := range in {
+            if n%2 == 0 {
+                out <- n
+            }
+        }
+    }()
+    return out
+}
+
+func main() {
+    // Build pipeline
+    numbers := generator(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+    squared := square(numbers)
+    evens := filterEven(squared)
+    
+    // Consume results
+    for n := range evens {
+        fmt.Println(n)
+    }
+}</code></pre>
+
+                <h3>3. Context-Based Cancellation</h3>
+                <pre><code>package main
+
+import (
+    "context"
+    "fmt"
+    "time"
+)
+
+func worker(ctx context.Context, id int) <-chan int {
+    out := make(chan int)
+    
+    go func() {
+        defer close(out)
+        for i := 0; ; i++ {
+            select {
+            case <-ctx.Done():
+                fmt.Printf("Worker %d cancelled\n", id)
+                return
+            case out <- i:
+                time.Sleep(500 * time.Millisecond)
+            }
+        }
+    }()
+    
+    return out
+}
+
+func main() {
+    ctx, cancel := context.WithTimeout(
+        context.Background(),
+        3*time.Second,
+    )
+    defer cancel()
+    
+    results := worker(ctx, 1)
+    
+    for num := range results {
+        fmt.Println("Received:", num)
+    }
+    
+    fmt.Println("Done")
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-exclamation-triangle"></i> Common Pitfalls</h2>
+                <div class="warning-box">
+                    <h3>Deadlocks</h3>
+                    <pre><code>// WRONG - Deadlock!
+ch := make(chan int)
+ch <- 42 // Blocks forever (unbuffered, no receiver)
+fmt.Println(<-ch)
+
+// RIGHT - Use goroutine
+ch := make(chan int)
+go func() {
+    ch <- 42
+}()
+fmt.Println(<-ch)</code></pre>
+
+                    <h3>Goroutine Leaks</h3>
+                    <pre><code>// WRONG - Goroutine leaks if no one receives
+func leak() <-chan int {
+    ch := make(chan int)
+    go func() {
+        ch <- 42 // Blocks if not consumed
+    }()
+    return ch
+}
+
+// RIGHT - Use buffered channel or ensure consumption
+func noLeak() <-chan int {
+    ch := make(chan int, 1) // Buffered
+    go func() {
+        ch <- 42
+        close(ch)
+    }()
+    return ch
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-check-circle"></i> Best Practices</h2>
+                <div class="tip-box">
+                    <ul>
+                        <li>✅ Close channels only from the sender side</li>
+                        <li>✅ Use buffered channels to prevent blocking when appropriate</li>
+                        <li>✅ Prefer select with timeout over indefinite blocking</li>
+                        <li>✅ Use directional channels in function signatures for clarity</li>
+                        <li>✅ Always ensure goroutines can exit (avoid leaks)</li>
+                        <li>✅ Use context for cancellation propagation</li>
+                        <li>✅ Document channel ownership and closing responsibility</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="navigation-links">
+                <a href="goroutines.html" class="nav-link"><i class="fas fa-arrow-left"></i> Previous: Goroutines</a>
+                <a href="rest-api-gin.html" class="nav-link">Next: REST API with Gin <i
+                        class="fas fa-arrow-right"></i></a>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebar = doc.querySelector('.sidebar');
+                if (sidebar) {
+                    document.getElementById('sidebarContainer').appendChild(sidebar);
+                    const event = new Event('sidebarLoaded');
+                    document.dispatchEvent(event);
+                }
+            });
+    </script>
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>

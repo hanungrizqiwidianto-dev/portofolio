@@ -1,0 +1,346 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REST API Design - Hanung's Dev Wiki</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-left">
+            <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+            <a href="../../index.html" class="logo"><i class="fas fa-code"></i><span>Hanung's Dev Wiki</span></a>
+        </div>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar" id="sidebar"></aside>
+        <main class="main-content">
+            <div class="breadcrumb">
+                <a href="../../index.html">Home</a><span>/</span>
+                <a href="#">Backend Development</a><span>/</span>
+                <span>REST API Design</span>
+            </div>
+
+            <article class="doc-article">
+                <h1>REST API Design Best Practices</h1>
+                <div class="doc-meta">
+                    <span class="badge badge-backend">Backend Development</span>
+                    <span class="doc-date"><i class="fas fa-calendar"></i> Updated: Nov 25, 2025</span>
+                </div>
+
+                <section class="doc-section">
+                    <h2>What is REST?</h2>
+                    <p>
+                        <strong>REST (Representational State Transfer)</strong> is an architectural style for designing
+                        networked applications.
+                        It relies on a stateless, client-server protocol, almost always HTTP.
+                    </p>
+                    <div class="info-box">
+                        <i class="fas fa-lightbulb"></i>
+                        <div>
+                            REST is not a protocol or standard, but rather a set of architectural constraints.
+                            RESTful systems are stateless, cacheable, and have a uniform interface.
+                        </div>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>HTTP Methods</h2>
+                    <table class="doc-table">
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Description</th>
+                                <th>Idempotent</th>
+                                <th>Safe</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>GET</code></td>
+                                <td>Retrieve a resource</td>
+                                <td>✅ Yes</td>
+                                <td>✅ Yes</td>
+                            </tr>
+                            <tr>
+                                <td><code>POST</code></td>
+                                <td>Create a new resource</td>
+                                <td>❌ No</td>
+                                <td>❌ No</td>
+                            </tr>
+                            <tr>
+                                <td><code>PUT</code></td>
+                                <td>Update/Replace a resource</td>
+                                <td>✅ Yes</td>
+                                <td>❌ No</td>
+                            </tr>
+                            <tr>
+                                <td><code>PATCH</code></td>
+                                <td>Partial update of a resource</td>
+                                <td>❌ No</td>
+                                <td>❌ No</td>
+                            </tr>
+                            <tr>
+                                <td><code>DELETE</code></td>
+                                <td>Delete a resource</td>
+                                <td>✅ Yes</td>
+                                <td>❌ No</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section class="doc-section">
+                    <h2>URL Design Principles</h2>
+                    <h3>1. Use Nouns, Not Verbs</h3>
+                    <div class="code-comparison">
+                        <div class="bad-practice">
+                            <h4>❌ Bad</h4>
+                            <pre><code>GET  /getUsers
+POST /createUser
+POST /deleteUser/123</code></pre>
+                        </div>
+                        <div class="good-practice">
+                            <h4>✅ Good</h4>
+                            <pre><code>GET    /users
+POST   /users
+DELETE /users/123</code></pre>
+                        </div>
+                    </div>
+
+                    <h3>2. Use Plural Nouns</h3>
+                    <div class="code-comparison">
+                        <div class="bad-practice">
+                            <h4>❌ Bad</h4>
+                            <pre><code>GET /user/123
+GET /product/456</code></pre>
+                        </div>
+                        <div class="good-practice">
+                            <h4>✅ Good</h4>
+                            <pre><code>GET /users/123
+GET /products/456</code></pre>
+                        </div>
+                    </div>
+
+                    <h3>3. Use Hierarchical Structure</h3>
+                    <pre><code>GET /users/123/orders           # Get all orders for user 123
+GET /users/123/orders/456       # Get order 456 for user 123
+GET /categories/5/products      # Get all products in category 5</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>HTTP Status Codes</h2>
+                    <h3>2xx Success</h3>
+                    <ul>
+                        <li><code>200 OK</code> - Standard success response</li>
+                        <li><code>201 Created</code> - Resource successfully created</li>
+                        <li><code>204 No Content</code> - Success but no content to return</li>
+                    </ul>
+
+                    <h3>4xx Client Errors</h3>
+                    <ul>
+                        <li><code>400 Bad Request</code> - Invalid request syntax</li>
+                        <li><code>401 Unauthorized</code> - Authentication required</li>
+                        <li><code>403 Forbidden</code> - Authenticated but not authorized</li>
+                        <li><code>404 Not Found</code> - Resource not found</li>
+                        <li><code>422 Unprocessable Entity</code> - Validation errors</li>
+                    </ul>
+
+                    <h3>5xx Server Errors</h3>
+                    <ul>
+                        <li><code>500 Internal Server Error</code> - Generic server error</li>
+                        <li><code>503 Service Unavailable</code> - Server temporarily unavailable</li>
+                    </ul>
+                </section>
+
+                <section class="doc-section">
+                    <h2>ASP.NET Core Example</h2>
+                    <pre><code class="language-csharp">using Microsoft.AspNetCore.Mvc;
+
+[ApiController]
+[Route("api/[controller]")]
+public class UsersController : ControllerBase
+{
+    private readonly IUserService _userService;
+    
+    public UsersController(IUserService userService)
+    {
+        _userService = userService;
+    }
+    
+    // GET: api/users
+    [HttpGet]
+    public async Task&lt;ActionResult&lt;IEnumerable&lt;UserDto&gt;&gt;&gt; GetUsers(
+        [FromQuery] int page = 1, 
+        [FromQuery] int pageSize = 10)
+    {
+        var users = await _userService.GetUsersAsync(page, pageSize);
+        return Ok(users);
+    }
+    
+    // GET: api/users/5
+    [HttpGet("{id}")]
+    public async Task&lt;ActionResult&lt;UserDto&gt;&gt; GetUser(int id)
+    {
+        var user = await _userService.GetUserByIdAsync(id);
+        
+        if (user == null)
+            return NotFound(new { message = "User not found" });
+            
+        return Ok(user);
+    }
+    
+    // POST: api/users
+    [HttpPost]
+    public async Task&lt;ActionResult&lt;UserDto&gt;&gt; CreateUser(CreateUserDto createUserDto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+            
+        var user = await _userService.CreateUserAsync(createUserDto);
+        return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
+    }
+    
+    // PUT: api/users/5
+    [HttpPut("{id}")]
+    public async Task&lt;IActionResult&gt; UpdateUser(int id, UpdateUserDto updateUserDto)
+    {
+        if (id != updateUserDto.Id)
+            return BadRequest(new { message = "ID mismatch" });
+            
+        var success = await _userService.UpdateUserAsync(id, updateUserDto);
+        
+        if (!success)
+            return NotFound();
+            
+        return NoContent();
+    }
+    
+    // DELETE: api/users/5
+    [HttpDelete("{id}")]
+    public async Task&lt;IActionResult&gt; DeleteUser(int id)
+    {
+        var success = await _userService.DeleteUserAsync(id);
+        
+        if (!success)
+            return NotFound();
+            
+        return NoContent();
+    }
+}</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Best Practices Checklist</h2>
+                    <div class="checklist">
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Use meaningful resource names (nouns, not verbs)</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Use proper HTTP methods (GET, POST, PUT, DELETE)</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Return appropriate HTTP status codes</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Use versioning (e.g., /api/v1/users)</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Implement pagination for lists</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Use filtering, sorting, and field selection</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Provide meaningful error messages</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Use HTTPS for security</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Implement rate limiting</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Document your API (Swagger/OpenAPI)</span>
+                        </div>
+                    </div>
+                </section>
+            </article>
+        </main>
+    </div>
+
+    <script>
+        // Load sidebar dynamically FIRST before loading main.js
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                const sidebarElement = document.getElementById('sidebar');
+
+                if (sidebarElement) {
+                    sidebarElement.innerHTML = sidebarContent;
+                    console.log('✅ Sidebar loaded successfully');
+
+                    // Dispatch event after sidebar is loaded
+                    const event = new Event('sidebarLoaded');
+                    document.dispatchEvent(event);
+                } else {
+                    console.error('❌ Sidebar element not found');
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error loading sidebar:', error);
+            });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                const sidebarElement = document.getElementById('sidebar');
+
+                if (sidebarElement) {
+                    sidebarElement.innerHTML = sidebarContent;
+                    console.log('âœ… Sidebar loaded successfully');
+
+                    // Dispatch event after sidebar is loaded
+                    const event = new Event('sidebarLoaded');
+                    document.dispatchEvent(event);
+                } else {
+                    console.error('âŒ Sidebar element not found');
+                }
+            })
+            .catch(error => {
+                console.error('âŒ Error loading sidebar:', error);
+            });
+    </script>
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>

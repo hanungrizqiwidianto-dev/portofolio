@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Toggle Test</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-left">
+            <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+            <a href="../index.html" class="logo"><i class="fas fa-code"></i><span>Theme Test</span></a>
+        </div>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+        </div>
+    </header>
+
+    <div style="padding: 50px; text-align: center;">
+        <h1>Theme Toggle Test Page</h1>
+        <p>Click the moon/sun icon in the top right corner to toggle theme</p>
+
+        <div style="margin-top: 30px; padding: 20px; background: var(--bg-secondary); border-radius: 8px;">
+            <h2>Current Theme Info</h2>
+            <p>Background: <code id="bg-color">--</code></p>
+            <p>Text Color: <code id="text-color">--</code></p>
+            <p>Theme Class: <code id="theme-class">--</code></p>
+            <p>LocalStorage: <code id="local-storage">--</code></p>
+        </div>
+
+        <button onclick="checkTheme()" style="margin-top: 20px; padding: 10px 20px; cursor: pointer;">
+            Refresh Theme Info
+        </button>
+    </div>
+
+    <script>
+        function checkTheme() {
+            const bgColor = getComputedStyle(document.body).backgroundColor;
+            const textColor = getComputedStyle(document.body).color;
+            const hasLightTheme = document.body.classList.contains('light-theme');
+            const storedTheme = localStorage.getItem('theme');
+
+            document.getElementById('bg-color').textContent = bgColor;
+            document.getElementById('text-color').textContent = textColor;
+            document.getElementById('theme-class').textContent = hasLightTheme ? 'light-theme' : 'dark-theme';
+            document.getElementById('local-storage').textContent = storedTheme || 'not set';
+
+            console.log('=== Theme Info ===');
+            console.log('BG Color:', bgColor);
+            console.log('Text Color:', textColor);
+            console.log('Has light-theme class:', hasLightTheme);
+            console.log('Stored theme:', storedTheme);
+        }
+
+        // Check on load
+        setTimeout(checkTheme, 500);
+
+        // Check every 2 seconds
+        setInterval(checkTheme, 2000);
+    </script>
+
+    <script src="../js/main.js"></script>
+</body>
+
+</html>

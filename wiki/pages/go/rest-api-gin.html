@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REST API with Gin - Go Development</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div id="sidebarContainer"></div>
+
+    <div class="container">
+        <main class="content">
+            <div class="page-header">
+                <div class="breadcrumb">
+                    <a href="../../index.html">Home</a>
+                    <span>/</span>
+                    <a href="#">Go Development</a>
+                    <span>/</span>
+                    <span>REST API with Gin</span>
+                </div>
+                <h1><i class="fas fa-server"></i> REST API with Gin Framework</h1>
+                <p class="page-description">Build high-performance REST APIs using Gin, the fastest Go web framework
+                    with a martini-like API.</p>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-rocket"></i> Getting Started with Gin</h2>
+                <p>Gin is a HTTP web framework written in Go. It features a martini-like API with performance up to 40
+                    times faster thanks to httprouter.</p>
+
+                <pre><code>// Installation
+go get -u github.com/gin-gonic/gin
+
+// Basic setup
+package main
+
+import (
+    "github.com/gin-gonic/gin"
+    "net/http"
+)
+
+func main() {
+    // Create router with default middleware
+    r := gin.Default()
+    
+    // Simple GET endpoint
+    r.GET("/ping", func(c *gin.Context) {
+        c.JSON(http.StatusOK, gin.H{
+            "message": "pong",
+        })
+    })
+    
+    // Start server
+    r.Run(":8080") // Listen on 0.0.0.0:8080
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-code"></i> Complete CRUD API Example</h2>
+                <pre><code>package main
+
+import (
+    "net/http"
+    "strconv"
+    
+    "github.com/gin-gonic/gin"
+)
+
+// Models
+type User struct {
+    ID       int    `json:"id"`
+    Name     string `json:"name" binding:"required"`
+    Email    string `json:"email" binding:"required,email"`
+    Age      int    `json:"age" binding:"gte=0,lte=130"`
+}
+
+type ErrorResponse struct {
+    Error   string `json:"error"`
+    Message string `json:"message"`
+}
+
+// In-memory database (use real DB in production)
+var users = []User{
+    {ID: 1, Name: "John Doe", Email: "john@example.com", Age: 30},
+    {ID: 2, Name: "Jane Smith", Email: "jane@example.com", Age: 25},
+}
+var nextID = 3
+
+func main() {
+    router := gin.Default()
+    
+    // API v1 group
+    v1 := router.Group("/api/v1")
+    {
+        v1.GET("/users", getUsers)
+        v1.GET("/users/:id", getUserByID)
+        v1.POST("/users", createUser)
+        v1.PUT("/users/:id", updateUser)
+        v1.DELETE("/users/:id", deleteUser)
+    }
+    
+    router.Run(":8080")
+}
+
+// GET /api/v1/users
+func getUsers(c *gin.Context) {
+    c.JSON(http.StatusOK, gin.H{
+        "data": users,
+        "count": len(users),
+    })
+}
+
+// GET /api/v1/users/:id
+func getUserByID(c *gin.Context) {
+    id, err := strconv.Atoi(c.Param("id"))
+    if err != nil {
+        c.JSON(http.StatusBadRequest, ErrorResponse{
+            Error: "invalid_id",
+            Message: "User ID must be a number",
+        })
+        return
+    }
+    
+    for _, user := range users {
+        if user.ID == id {
+            c.JSON(http.StatusOK, user)
+            return
+        }
+    }
+    
+    c.JSON(http.StatusNotFound, ErrorResponse{
+        Error: "not_found",
+        Message: "User not found",
+    })
+}
+
+// POST /api/v1/users
+func createUser(c *gin.Context) {
+    var newUser User
+    
+    if err := c.ShouldBindJSON(&newUser); err != nil {
+        c.JSON(http.StatusBadRequest, ErrorResponse{
+            Error: "validation_error",
+            Message: err.Error(),
+        })
+        return
+    }
+    
+    newUser.ID = nextID
+    nextID++
+    users = append(users, newUser)
+    
+    c.JSON(http.StatusCreated, newUser)
+}
+
+// PUT /api/v1/users/:id
+func updateUser(c *gin.Context) {
+    id, err := strconv.Atoi(c.Param("id"))
+    if err != nil {
+        c.JSON(http.StatusBadRequest, ErrorResponse{
+            Error: "invalid_id",
+            Message: "User ID must be a number",
+        })
+        return
+    }
+    
+    var updatedUser User
+    if err := c.ShouldBindJSON(&updatedUser); err != nil {
+        c.JSON(http.StatusBadRequest, ErrorResponse{
+            Error: "validation_error",
+            Message: err.Error(),
+        })
+        return
+    }
+    
+    for i, user := range users {
+        if user.ID == id {
+            updatedUser.ID = id
+            users[i] = updatedUser
+            c.JSON(http.StatusOK, updatedUser)
+            return
+        }
+    }
+    
+    c.JSON(http.StatusNotFound, ErrorResponse{
+        Error: "not_found",
+        Message: "User not found",
+    })
+}
+
+// DELETE /api/v1/users/:id
+func deleteUser(c *gin.Context) {
+    id, err := strconv.Atoi(c.Param("id"))
+    if err != nil {
+        c.JSON(http.StatusBadRequest, ErrorResponse{
+            Error: "invalid_id",
+            Message: "User ID must be a number",
+        })
+        return
+    }
+    
+    for i, user := range users {
+        if user.ID == id {
+            users = append(users[:i], users[i+1:]...)
+            c.JSON(http.StatusOK, gin.H{
+                "message": "User deleted successfully",
+            })
+            return
+        }
+    }
+    
+    c.JSON(http.StatusNotFound, ErrorResponse{
+        Error: "not_found",
+        Message: "User not found",
+    })
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-shield-alt"></i> Middleware</h2>
+                <pre><code>package main
+
+import (
+    "log"
+    "time"
+    
+    "github.com/gin-gonic/gin"
+)
+
+// Logger middleware
+func Logger() gin.HandlerFunc {
+    return func(c *gin.Context) {
+        start := time.Now()
+        path := c.Request.URL.Path
+        
+        c.Next() // Process request
+        
+        duration := time.Since(start)
+        log.Printf(
+            "%s %s %d %s",
+            c.Request.Method,
+            path,
+            c.Writer.Status(),
+            duration,
+        )
+    }
+}
+
+// Auth middleware
+func AuthRequired() gin.HandlerFunc {
+    return func(c *gin.Context) {
+        token := c.GetHeader("Authorization")
+        
+        if token == "" {
+            c.JSON(401, gin.H{"error": "No authorization header"})
+            c.Abort()
+            return
+        }
+        
+        // Validate token (simplified)
+        if token != "Bearer valid-token" {
+            c.JSON(401, gin.H{"error": "Invalid token"})
+            c.Abort()
+            return
+        }
+        
+        c.Next()
+    }
+}
+
+// CORS middleware
+func CORSMiddleware() gin.HandlerFunc {
+    return func(c *gin.Context) {
+        c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+        c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+        c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        
+        if c.Request.Method == "OPTIONS" {
+            c.AbortWithStatus(204)
+            return
+        }
+        
+        c.Next()
+    }
+}
+
+func main() {
+    router := gin.New()
+    
+    // Global middleware
+    router.Use(Logger())
+    router.Use(CORSMiddleware())
+    router.Use(gin.Recovery())
+    
+    // Public routes
+    router.GET("/public", func(c *gin.Context) {
+        c.JSON(200, gin.H{"message": "Public endpoint"})
+    })
+    
+    // Protected routes
+    protected := router.Group("/protected")
+    protected.Use(AuthRequired())
+    {
+        protected.GET("/data", func(c *gin.Context) {
+            c.JSON(200, gin.H{"message": "Protected data"})
+        })
+    }
+    
+    router.Run(":8080")
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-database"></i> Query Parameters & Request Binding</h2>
+                <pre><code>package main
+
+import (
+    "github.com/gin-gonic/gin"
+    "net/http"
+)
+
+type SearchQuery struct {
+    Query    string `form:"q" binding:"required"`
+    Page     int    `form:"page" binding:"gte=1"`
+    PageSize int    `form:"page_size" binding:"gte=1,lte=100"`
+}
+
+type LoginRequest struct {
+    Username string `json:"username" binding:"required,min=3"`
+    Password string `json:"password" binding:"required,min=8"`
+}
+
+func main() {
+    r := gin.Default()
+    
+    // Query parameters
+    r.GET("/search", func(c *gin.Context) {
+        var query SearchQuery
+        
+        if err := c.ShouldBindQuery(&query); err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            return
+        }
+        
+        c.JSON(http.StatusOK, gin.H{
+            "query": query.Query,
+            "page": query.Page,
+            "page_size": query.PageSize,
+        })
+    })
+    
+    // JSON body binding
+    r.POST("/login", func(c *gin.Context) {
+        var login LoginRequest
+        
+        if err := c.ShouldBindJSON(&login); err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            return
+        }
+        
+        // Process login...
+        c.JSON(http.StatusOK, gin.H{
+            "message": "Login successful",
+            "username": login.Username,
+        })
+    })
+    
+    // Path parameters
+    r.GET("/users/:id/posts/:postId", func(c *gin.Context) {
+        userID := c.Param("id")
+        postID := c.Param("postId")
+        
+        c.JSON(http.StatusOK, gin.H{
+            "user_id": userID,
+            "post_id": postID,
+        })
+    })
+    
+    r.Run(":8080")
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-file-upload"></i> File Upload</h2>
+                <pre><code>package main
+
+import (
+    "fmt"
+    "path/filepath"
+    
+    "github.com/gin-gonic/gin"
+)
+
+func main() {
+    r := gin.Default()
+    
+    // Single file upload
+    r.POST("/upload", func(c *gin.Context) {
+        file, err := c.FormFile("file")
+        if err != nil {
+            c.JSON(400, gin.H{"error": "No file uploaded"})
+            return
+        }
+        
+        // Save file
+        filename := filepath.Base(file.Filename)
+        if err := c.SaveUploadedFile(file, "./uploads/"+filename); err != nil {
+            c.JSON(500, gin.H{"error": "Failed to save file"})
+            return
+        }
+        
+        c.JSON(200, gin.H{
+            "message": "File uploaded successfully",
+            "filename": filename,
+            "size": file.Size,
+        })
+    })
+    
+    // Multiple files upload
+    r.POST("/upload-multiple", func(c *gin.Context) {
+        form, _ := c.MultipartForm()
+        files := form.File["files[]"]
+        
+        for _, file := range files {
+            filename := filepath.Base(file.Filename)
+            c.SaveUploadedFile(file, "./uploads/"+filename)
+        }
+        
+        c.JSON(200, gin.H{
+            "message": fmt.Sprintf("%d files uploaded", len(files)),
+        })
+    })
+    
+    r.Run(":8080")
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-check-circle"></i> Best Practices</h2>
+                <div class="tip-box">
+                    <ul>
+                        <li>✅ Use router groups for versioning (e.g., /api/v1, /api/v2)</li>
+                        <li>✅ Implement proper error handling and consistent error responses</li>
+                        <li>✅ Use struct tags for request validation</li>
+                        <li>✅ Implement middleware for cross-cutting concerns (auth, logging, CORS)</li>
+                        <li>✅ Set timeouts for production servers</li>
+                        <li>✅ Use environment variables for configuration</li>
+                        <li>✅ Implement graceful shutdown</li>
+                        <li>✅ Add rate limiting for public endpoints</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="navigation-links">
+                <a href="channels.html" class="nav-link"><i class="fas fa-arrow-left"></i> Previous: Channels</a>
+                <a href="gorm.html" class="nav-link">Next: GORM ORM <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebar = doc.querySelector('.sidebar');
+                if (sidebar) {
+                    document.getElementById('sidebarContainer').appendChild(sidebar);
+                    const event = new Event('sidebarLoaded');
+                    document.dispatchEvent(event);
+                }
+            });
+    </script>
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>

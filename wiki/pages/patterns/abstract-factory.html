@@ -1,0 +1,448 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abstract Factory Pattern - Hanung's Dev Wiki</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-left">
+            <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+            <a href="../../index.html" class="logo"><i class="fas fa-code"></i><span>Hanung's Dev Wiki</span></a>
+        </div>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar" id="sidebar"></aside>
+        <main class="main-content">
+            <div class="breadcrumb">
+                <a href="../../index.html">Home</a><span>/</span>
+                <a href="#">Design Patterns</a><span>/</span>
+                <span>Abstract Factory Pattern</span>
+            </div>
+
+            <article class="doc-article">
+                <h1>Abstract Factory Pattern</h1>
+                <div class="doc-meta">
+                    <span class="badge badge-creational">Creational Pattern</span>
+                    <span class="doc-date"><i class="fas fa-calendar"></i> Updated: Nov 25, 2025</span>
+                </div>
+
+                <section class="doc-section">
+                    <h2>Overview</h2>
+                    <p>
+                        Abstract Factory is a creational design pattern that lets you produce families of related
+                        objects
+                        without specifying their concrete classes. It provides an interface for creating families of
+                        related
+                        or dependent objects without specifying their concrete classes.
+                    </p>
+                    <div class="info-box">
+                        <i class="fas fa-lightbulb"></i>
+                        <div>
+                            <strong>When to use:</strong> When your code needs to work with various families of related
+                            products,
+                            but you don't want it to depend on the concrete classes of those products. Use when you want
+                            to provide
+                            a class library of products, and you want to reveal just their interfaces, not their
+                            implementations.
+                        </div>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Problem</h2>
+                    <p>
+                        Imagine you're creating a furniture shop simulator. Your code consists of classes that
+                        represent:
+                        a family of related products, say: Chair + Sofa + CoffeeTable. You need different variants of
+                        these products: Modern, Victorian, ArtDeco. You need a way to create individual furniture
+                        objects
+                        so that they match other objects of the same family.
+                    </p>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Solution</h2>
+                    <p>
+                        The Abstract Factory pattern suggests explicitly declaring interfaces for each distinct product
+                        of the product family. Then you can make all variants of products follow those interfaces. The
+                        next
+                        step is to declare the Abstract Factory—an interface with a list of creation methods for all
+                        products.
+                    </p>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Implementation in C#</h2>
+
+                    <h3>Product Interfaces</h3>
+                    <pre><code class="language-csharp">// Abstract products
+public interface IButton
+{
+    void Render();
+    void OnClick();
+}
+
+public interface ICheckbox
+{
+    void Render();
+    void Toggle();
+}
+
+// Concrete products - Windows family
+public class WindowsButton : IButton
+{
+    public void Render() => Console.WriteLine("Rendering Windows button");
+    public void OnClick() => Console.WriteLine("Windows button clicked");
+}
+
+public class WindowsCheckbox : ICheckbox
+{
+    public void Render() => Console.WriteLine("Rendering Windows checkbox");
+    public void Toggle() => Console.WriteLine("Windows checkbox toggled");
+}
+
+// Concrete products - MacOS family
+public class MacButton : IButton
+{
+    public void Render() => Console.WriteLine("Rendering Mac button");
+    public void OnClick() => Console.WriteLine("Mac button clicked");
+}
+
+public class MacCheckbox : ICheckbox
+{
+    public void Render() => Console.WriteLine("Rendering Mac checkbox");
+    public void Toggle() => Console.WriteLine("Mac checkbox toggled");
+}</code></pre>
+
+                    <h3>Abstract Factory</h3>
+                    <pre><code class="language-csharp">// Abstract Factory interface
+public interface IGUIFactory
+{
+    IButton CreateButton();
+    ICheckbox CreateCheckbox();
+}
+
+// Concrete Factories
+public class WindowsFactory : IGUIFactory
+{
+    public IButton CreateButton() => new WindowsButton();
+    public ICheckbox CreateCheckbox() => new WindowsCheckbox();
+}
+
+public class MacFactory : IGUIFactory
+{
+    public IButton CreateButton() => new MacButton();
+    public ICheckbox CreateCheckbox() => new MacCheckbox();
+}</code></pre>
+
+                    <h3>Client Code</h3>
+                    <pre><code class="language-csharp">public class Application
+{
+    private readonly IButton _button;
+    private readonly ICheckbox _checkbox;
+
+    public Application(IGUIFactory factory)
+    {
+        _button = factory.CreateButton();
+        _checkbox = factory.CreateCheckbox();
+    }
+
+    public void Render()
+    {
+        _button.Render();
+        _checkbox.Render();
+    }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        IGUIFactory factory;
+        string os = "Windows"; // Could be determined at runtime
+
+        if (os == "Windows")
+            factory = new WindowsFactory();
+        else
+            factory = new MacFactory();
+
+        var app = new Application(factory);
+        app.Render();
+    }
+}</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Implementation in Python</h2>
+
+                    <pre><code class="language-python">from abc import ABC, abstractmethod
+
+# Abstract Products
+class Button(ABC):
+    @abstractmethod
+    def render(self):
+        pass
+    
+    @abstractmethod
+    def on_click(self):
+        pass
+
+class Checkbox(ABC):
+    @abstractmethod
+    def render(self):
+        pass
+    
+    @abstractmethod
+    def toggle(self):
+        pass
+
+# Concrete Products
+class WindowsButton(Button):
+    def render(self):
+        return "Rendering Windows button"
+    
+    def on_click(self):
+        return "Windows button clicked"
+
+class WindowsCheckbox(Checkbox):
+    def render(self):
+        return "Rendering Windows checkbox"
+    
+    def toggle(self):
+        return "Windows checkbox toggled"
+
+class MacButton(Button):
+    def render(self):
+        return "Rendering Mac button"
+    
+    def on_click(self):
+        return "Mac button clicked"
+
+class MacCheckbox(Checkbox):
+    def render(self):
+        return "Rendering Mac checkbox"
+    
+    def toggle(self):
+        return "Mac checkbox toggled"
+
+# Abstract Factory
+class GUIFactory(ABC):
+    @abstractmethod
+    def create_button(self) -> Button:
+        pass
+    
+    @abstractmethod
+    def create_checkbox(self) -> Checkbox:
+        pass
+
+# Concrete Factories
+class WindowsFactory(GUIFactory):
+    def create_button(self) -> Button:
+        return WindowsButton()
+    
+    def create_checkbox(self) -> Checkbox:
+        return WindowsCheckbox()
+
+class MacFactory(GUIFactory):
+    def create_button(self) -> Button:
+        return MacButton()
+    
+    def create_checkbox(self) -> Checkbox:
+        return MacCheckbox()
+
+# Client
+class Application:
+    def __init__(self, factory: GUIFactory):
+        self.button = factory.create_button()
+        self.checkbox = factory.create_checkbox()
+    
+    def render(self):
+        print(self.button.render())
+        print(self.checkbox.render())
+
+# Usage
+factory = WindowsFactory()
+app = Application(factory)
+app.render()</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Real-World Example: Database Factory</h2>
+                    <pre><code class="language-csharp">// Products
+public interface IConnection
+{
+    void Connect();
+}
+
+public interface ICommand
+{
+    void Execute(string sql);
+}
+
+// SQL Server implementations
+public class SqlConnection : IConnection
+{
+    public void Connect() => Console.WriteLine("Connected to SQL Server");
+}
+
+public class SqlCommand : ICommand
+{
+    public void Execute(string sql) => Console.WriteLine($"SQL: {sql}");
+}
+
+// PostgreSQL implementations
+public class PostgresConnection : IConnection
+{
+    public void Connect() => Console.WriteLine("Connected to PostgreSQL");
+}
+
+public class PostgresCommand : ICommand
+{
+    public void Execute(string sql) => Console.WriteLine($"PG: {sql}");
+}
+
+// Abstract Factory
+public interface IDatabaseFactory
+{
+    IConnection CreateConnection();
+    ICommand CreateCommand();
+}
+
+// Concrete Factories
+public class SqlServerFactory : IDatabaseFactory
+{
+    public IConnection CreateConnection() => new SqlConnection();
+    public ICommand CreateCommand() => new SqlCommand();
+}
+
+public class PostgresFactory : IDatabaseFactory
+{
+    public IConnection CreateConnection() => new PostgresConnection();
+    public ICommand CreateCommand() => new PostgresCommand();
+}
+
+// Usage
+public class DataAccess
+{
+    private readonly IConnection _connection;
+    private readonly ICommand _command;
+
+    public DataAccess(IDatabaseFactory factory)
+    {
+        _connection = factory.CreateConnection();
+        _command = factory.CreateCommand();
+    }
+
+    public void ExecuteQuery(string sql)
+    {
+        _connection.Connect();
+        _command.Execute(sql);
+    }
+}</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Pros and Cons</h2>
+                    <div class="pros-cons-grid">
+                        <div class="pros-box">
+                            <h3><i class="fas fa-check-circle"></i> Advantages</h3>
+                            <ul>
+                                <li>Ensures that products from a factory are compatible with each other</li>
+                                <li>Avoids tight coupling between concrete products and client code</li>
+                                <li>Single Responsibility Principle - product creation code in one place</li>
+                                <li>Open/Closed Principle - introduce new product variants without breaking existing
+                                    code</li>
+                            </ul>
+                        </div>
+                        <div class="cons-box">
+                            <h3><i class="fas fa-times-circle"></i> Disadvantages</h3>
+                            <ul>
+                                <li>Code may become more complicated due to many new interfaces and classes</li>
+                                <li>Difficult to add new products (requires changing all factories)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Difference from Factory Method</h2>
+                    <ul>
+                        <li><strong>Factory Method:</strong> Uses inheritance and creates one product</li>
+                        <li><strong>Abstract Factory:</strong> Uses object composition and creates families of products
+                        </li>
+                        <li><strong>Factory Method:</strong> Often implemented as a single method in a class</li>
+                        <li><strong>Abstract Factory:</strong> Multiple factory methods that create related products
+                        </li>
+                    </ul>
+                </section>
+
+                <div class="doc-navigation">
+                    <a href="factory-method.html" class="nav-prev"><i class="fas fa-arrow-left"></i><span>Factory
+                            Method</span></a>
+                    <a href="decorator.html" class="nav-next"><span>Decorator</span><i
+                            class="fas fa-arrow-right"></i></a>
+                </div>
+            </article>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                document.getElementById('sidebar').innerHTML = sidebarContent;
+                
+                // Re-run sidebar initialization from main.js
+                const event = new Event('sidebarLoaded');
+                document.dispatchEvent(event);
+            });
+    </script>
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                const sidebarElement = document.getElementById('sidebar');
+                
+                if (sidebarElement) {
+                    sidebarElement.innerHTML = sidebarContent;
+                    console.log('âœ… Sidebar loaded successfully');
+                    
+                    // Dispatch event after sidebar is loaded
+                    const event = new Event('sidebarLoaded');
+                    document.dispatchEvent(event);
+                } else {
+                    console.error('âŒ Sidebar element not found');
+                }
+            })
+            .catch(error => {
+                console.error('âŒ Error loading sidebar:', error);
+            });
+    </script>
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>

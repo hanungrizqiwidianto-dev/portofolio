@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NPM & Package Management - Node.js Development</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div id="sidebarContainer"></div>
+
+    <div class="container">
+        <main class="content">
+            <div class="page-header">
+                <div class="breadcrumb">
+                    <a href="../../index.html">Home</a>
+                    <span>/</span>
+                    <a href="#">Node.js Development</a>
+                    <span>/</span>
+                    <span>NPM & Package Management</span>
+                </div>
+                <h1><i class="fab fa-npm"></i> NPM & Package Management</h1>
+                <p class="page-description">Master NPM, package management, version control, and publishing packages to
+                    the Node Package Manager registry.</p>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-download"></i> Installing Packages</h2>
+                <pre><code># Install package (production dependency)
+npm install express
+
+# Install as dev dependency
+npm install --save-dev jest
+
+# Install globally
+npm install -g typescript
+
+# Install specific version
+npm install express@4.18.2
+
+# Install multiple packages
+npm install express mongoose dotenv
+
+# Install all dependencies from package.json
+npm install
+
+# Install only production dependencies
+npm install --production</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-file-code"></i> package.json</h2>
+                <pre><code>{
+  "name": "my-app",
+  "version": "1.0.0",
+  "description": "My Node.js application",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "jest",
+    "build": "tsc",
+    "lint": "eslint src/**/*.js"
+  },
+  "keywords": ["api", "rest", "nodejs"],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.5.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "jest": "^29.6.4",
+    "nodemon": "^3.0.1",
+    "eslint": "^8.48.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-code-branch"></i> Semantic Versioning</h2>
+                <pre><code># Version format: MAJOR.MINOR.PATCH
+# Example: 1.2.3
+
+# MAJOR: Breaking changes (1.0.0 → 2.0.0)
+# MINOR: New features, backward compatible (1.0.0 → 1.1.0)
+# PATCH: Bug fixes (1.0.0 → 1.0.1)
+
+# Version ranges in package.json:
+{
+  "dependencies": {
+    "express": "4.18.2",      // Exact version
+    "mongoose": "^7.5.0",     // Compatible with 7.x.x
+    "dotenv": "~16.3.1",      // Compatible with 16.3.x
+    "lodash": ">=4.17.21",    // Greater than or equal
+    "moment": "<3.0.0",       // Less than
+    "axios": "*"              // Any version (not recommended)
+  }
+}
+
+# ^ (Caret): Allow MINOR and PATCH updates
+# ^1.2.3 → >=1.2.3 <2.0.0
+
+# ~ (Tilde): Allow only PATCH updates
+# ~1.2.3 → >=1.2.3 <1.3.0</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-lock"></i> Package Lock</h2>
+                <pre><code># package-lock.json
+# - Locks exact versions of all dependencies
+# - Ensures consistent installs across environments
+# - Should be committed to version control
+
+# Update dependencies
+npm update
+
+# Check for outdated packages
+npm outdated
+
+# Update specific package
+npm update express
+
+# Audit for vulnerabilities
+npm audit
+
+# Fix vulnerabilities automatically
+npm audit fix
+
+# Force fix (may introduce breaking changes)
+npm audit fix --force</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-box"></i> Creating & Publishing Packages</h2>
+                <pre><code># Initialize package
+npm init
+
+# Or use defaults
+npm init -y
+
+# package.json for publishable package
+{
+  "name": "@username/my-package",
+  "version": "1.0.0",
+  "description": "Awesome package",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/username/my-package"
+  },
+  "bugs": {
+    "url": "https://github.com/username/my-package/issues"
+  },
+  "homepage": "https://github.com/username/my-package#readme",
+  "keywords": ["utility", "helper"],
+  "author": "Your Name <email@example.com>",
+  "license": "MIT"
+}
+
+# Login to NPM
+npm login
+
+# Publish package
+npm publish
+
+# Publish scoped package (public)
+npm publish --access public
+
+# Update version
+npm version patch  # 1.0.0 → 1.0.1
+npm version minor  # 1.0.0 → 1.1.0
+npm version major  # 1.0.0 → 2.0.0
+
+# Unpublish (within 72 hours)
+npm unpublish package-name@version</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-project-diagram"></i> NPM Scripts</h2>
+                <pre><code>{
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "build": "webpack --mode production",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/**/*.js",
+    "lint:fix": "eslint src/**/*.js --fix",
+    "format": "prettier --write src/**/*.js",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean",
+    "postbuild": "npm run test",
+    "prepare": "husky install"
+  }
+}
+
+# Pre and post hooks
+# prestart, poststart, prebuild, postbuild, etc.
+
+# Run scripts
+npm run dev
+npm start  # 'run' optional for start
+npm test   # 'run' optional for test
+
+# Pass arguments to scripts
+npm run dev -- --port=4000
+
+# Run multiple scripts in sequence
+npm run clean && npm run build && npm run test
+
+# Run in parallel (install npm-run-all)
+npm-run-all --parallel lint test</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-bolt"></i> NPX - Package Runner</h2>
+                <pre><code># Run package without installing
+npx create-react-app my-app
+npx typescript --init
+npx jest
+
+# Run specific version
+npx typescript@4.9.5 --init
+
+# Run from URL
+npx https://gist.github.com/...
+
+# Execute local binary
+npx eslint src/**/*.js</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-yarn"></i> Alternative Package Managers</h2>
+                <pre><code># Yarn
+npm install -g yarn
+
+yarn add express
+yarn add --dev jest
+yarn install
+yarn remove express
+
+# PNPM (faster, disk space efficient)
+npm install -g pnpm
+
+pnpm install express
+pnpm install -D jest
+pnpm install
+pnpm remove express
+
+# Comparison
+┌─────────┬──────────┬──────────┬──────────┐
+│ Feature │   NPM    │   Yarn   │   PNPM   │
+├─────────┼──────────┼──────────┼──────────┤
+│ Speed   │ Moderate │   Fast   │ Fastest  │
+│ Disk    │  Higher  │  Higher  │  Lowest  │
+│ Lock    │   Yes    │   Yes    │   Yes    │
+│ Offline │    No    │   Yes    │   Yes    │
+└─────────┴──────────┴──────────┴──────────┘</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-shield-alt"></i> Security</h2>
+                <pre><code># Audit dependencies
+npm audit
+
+# View audit report
+npm audit --json
+
+# Fix vulnerabilities
+npm audit fix
+
+# Check for known vulnerabilities
+npm install -g snyk
+snyk test
+
+# Use .npmignore to exclude files from package
+# .npmignore
+node_modules/
+src/
+tests/
+.env
+*.log
+
+# Never commit .env or secrets
+# Use environment variables
+require('dotenv').config();
+
+const apiKey = process.env.API_KEY;</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-check-circle"></i> Best Practices</h2>
+                <div class="tip-box">
+                    <ul>
+                        <li>✅ Commit package-lock.json to version control</li>
+                        <li>✅ Use exact versions for critical dependencies</li>
+                        <li>✅ Regularly update dependencies (npm update)</li>
+                        <li>✅ Run npm audit frequently</li>
+                        <li>✅ Use .npmignore to exclude unnecessary files</li>
+                        <li>✅ Document all dependencies in package.json</li>
+                        <li>✅ Use dev dependencies appropriately</li>
+                        <li>✅ Follow semantic versioning for your packages</li>
+                        <li>✅ Test before publishing (prepublishOnly script)</li>
+                        <li>✅ Include README, LICENSE, and CHANGELOG</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="navigation-links">
+                <a href="testing.html" class="nav-link"><i class="fas fa-arrow-left"></i> Previous: Jest & Testing</a>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebar = doc.querySelector('.sidebar');
+                if (sidebar) {
+                    document.getElementById('sidebarContainer').appendChild(sidebar);
+                    const event = new Event('sidebarLoaded');
+                    document.dispatchEvent(event);
+                }
+            });
+    </script>
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>

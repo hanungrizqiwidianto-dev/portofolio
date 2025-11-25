@@ -1,0 +1,287 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Getting Started - Hanung's Dev Wiki</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-left">
+            <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+            <a href="../index.html" class="logo"><i class="fas fa-code"></i><span>Hanung's Dev Wiki</span></a>
+        </div>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar" id="sidebar"></aside>
+        <main class="main-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>/</span>
+                <span>Getting Started</span>
+            </div>
+
+            <article class="doc-article">
+                <h1>Getting Started with Hanung's Dev Wiki</h1>
+
+                <section class="doc-section">
+                    <h2>Welcome!</h2>
+                    <p>
+                        This wiki is a comprehensive collection of backend development knowledge, design patterns,
+                        architecture principles, and best practices. Whether you're a beginner or an experienced
+                        developer,
+                        you'll find valuable resources here.
+                    </p>
+                </section>
+
+                <section class="doc-section">
+                    <h2>What You'll Find Here</h2>
+
+                    <div class="card-grid">
+                        <div class="info-card">
+                            <h3><i class="fas fa-server"></i> Backend Development</h3>
+                            <p>REST API design, GraphQL, authentication, caching strategies, and database optimization
+                                techniques.</p>
+                        </div>
+
+                        <div class="info-card">
+                            <h3><i class="fas fa-cubes"></i> Microservices</h3>
+                            <p>Service discovery, API gateways, circuit breakers, saga patterns, and event-driven
+                                architecture.</p>
+                        </div>
+
+                        <div class="info-card">
+                            <h3><i class="fas fa-drafting-compass"></i> Software Architecture</h3>
+                            <p>Clean architecture, hexagonal architecture, CQRS, event sourcing, and domain-driven
+                                design.</p>
+                        </div>
+
+                        <div class="info-card">
+                            <h3><i class="fas fa-puzzle-piece"></i> Design Patterns</h3>
+                            <p>Creational, structural, and behavioral patterns with practical examples in C#, Python,
+                                and more.</p>
+                        </div>
+
+                        <div class="info-card">
+                            <h3><i class="fab fa-docker"></i> Docker & Kubernetes</h3>
+                            <p>Containerization, orchestration, networking, volumes, and production-ready
+                                configurations.</p>
+                        </div>
+
+                        <div class="info-card">
+                            <h3><i class="fas fa-code"></i> Programming Languages</h3>
+                            <p>.NET Core, Python (FastAPI, Django), and best practices for each technology stack.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>How to Navigate</h2>
+                    <ul>
+                        <li><strong>Sidebar:</strong> Use the left sidebar to browse topics by category</li>
+                        <li><strong>Search:</strong> Press <kbd>Ctrl+K</kbd> to quickly search for content</li>
+                        <li><strong>Theme:</strong> Toggle dark/light mode using the moon/sun icon</li>
+                        <li><strong>Navigation:</strong> Use the arrows at the bottom of each page to move between
+                            related topics</li>
+                    </ul>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Recommended Learning Path</h2>
+
+                    <div class="learning-path">
+                        <div class="path-step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h4>Fundamentals</h4>
+                                <p>Start with design patterns and software architecture basics</p>
+                                <a href="patterns/builder.html">Design Patterns →</a>
+                            </div>
+                        </div>
+
+                        <div class="path-step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h4>Backend Development</h4>
+                                <p>Learn REST API design, authentication, and database optimization</p>
+                                <a href="backend/rest-api.html">Backend Topics →</a>
+                            </div>
+                        </div>
+
+                        <div class="path-step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h4>Microservices</h4>
+                                <p>Understand distributed systems and microservices patterns</p>
+                                <a href="microservices/introduction.html">Microservices →</a>
+                            </div>
+                        </div>
+
+                        <div class="path-step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h4>DevOps</h4>
+                                <p>Master Docker, Kubernetes, and CI/CD pipelines</p>
+                                <a href="docker/basics.html">DevOps Tools →</a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Keyboard Shortcuts</h2>
+                    <div class="shortcuts-grid">
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd> + <kbd>K</kbd>
+                            <span>Focus search</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd> + <kbd>B</kbd>
+                            <span>Toggle sidebar</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Esc</kbd>
+                            <span>Close sidebar/search</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Contributing</h2>
+                    <p>
+                        This wiki is continuously updated with new content. If you find any errors or have suggestions,
+                        please reach out through <a href="https://github.com/hanungrizqiwidianto-dev"
+                            target="_blank">GitHub</a>.
+                    </p>
+                </section>
+            </article>
+        </main>
+    </div>
+
+    <script src="../js/main.js"></script>
+
+    <style>
+        .info-card {
+            background: var(--bg-secondary);
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+        }
+
+        .info-card:hover {
+            border-color: var(--accent-blue);
+            transform: translateY(-3px);
+        }
+
+        .info-card h3 {
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-card i {
+            color: var(--accent-blue);
+        }
+
+        .learning-path {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .path-step {
+            display: flex;
+            gap: 20px;
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-blue);
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .step-content h4 {
+            margin: 0 0 8px 0;
+            color: var(--text-primary);
+        }
+
+        .step-content a {
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+
+        .shortcuts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .shortcut-item {
+            background: var(--bg-secondary);
+            padding: 15px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        kbd {
+            background: var(--bg-tertiary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+
+    <script>
+        // Load sidebar dynamically
+        fetch('../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                const sidebarElement = document.getElementById('sidebar');
+
+                if (sidebarElement) {
+                    sidebarElement.innerHTML = sidebarContent;
+                    console.log('✅ Sidebar loaded successfully');
+
+                    // Dispatch event after sidebar is loaded
+                    const event = new Event('sidebarLoaded');
+                    document.dispatchEvent(event);
+                } else {
+                    console.error('❌ Sidebar element not found');
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error loading sidebar:', error);
+            });
+    </script>
+    <script src="../js/main.js"></script>
+</body>
+
+</html>

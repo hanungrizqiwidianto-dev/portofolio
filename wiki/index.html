@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hanung Rizqi Widianto - Wiki</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <a href="index.html" class="logo">
+                <i class="fas fa-code"></i>
+                <span>Hanung Rizqi Widianto - Wiki</span>
+            </a>
+        </div>
+        <nav class="header-nav">
+            <a href="index.html" class="nav-link active">Home</a>
+            <a href="pages/content-list.html" class="nav-link">Content List</a>
+            <a href="pages/interesting.html" class="nav-link">Interesting Pages</a>
+            <a href="pages/projects.html" class="nav-link">Ongoing Projects</a>
+        </nav>
+        <div class="header-right">
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search...">
+            </div>
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </button>
+            <a href="https://github.com/hanungrizqiwidianto-dev" target="_blank" class="github-link">
+                <i class="fab fa-github"></i>
+                <span>86</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-section">
+                <a href="index.html" class="sidebar-item active">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+                <a href="pages/getting-started.html" class="sidebar-item">
+                    <i class="fas fa-rocket"></i>
+                    <span>Getting Started</span>
+                </a>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-header">
+                    <i class="fas fa-server"></i>
+                    <span>Backend Development</span>
+                    <button class="collapse-btn">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div class="sidebar-submenu">
+                    <a href="pages/backend/rest-api.html" class="sidebar-item">REST API Design</a>
+                    <a href="pages/backend/graphql.html" class="sidebar-item">GraphQL</a>
+                    <a href="pages/backend/authentication.html" class="sidebar-item">Authentication & Authorization</a>
+                    <a href="pages/backend/database-optimization.html" class="sidebar-item">Database Optimization</a>
+                    <a href="pages/backend/caching.html" class="sidebar-item">Caching Strategies</a>
+                    <a href="pages/backend/message-queues.html" class="sidebar-item">Message Queues</a>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-header">
+                    <i class="fas fa-cubes"></i>
+                    <span>Microservices</span>
+                    <button class="collapse-btn">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div class="sidebar-submenu">
+                    <a href="pages/microservices/introduction.html" class="sidebar-item">Introduction to
+                        Microservices</a>
+                    <a href="pages/microservices/service-discovery.html" class="sidebar-item">Service Discovery</a>
+                    <a href="pages/microservices/api-gateway.html" class="sidebar-item">API Gateway Pattern</a>
+                    <a href="pages/microservices/circuit-breaker.html" class="sidebar-item">Circuit Breaker</a>
+                    <a href="pages/microservices/saga-pattern.html" class="sidebar-item">Saga Pattern</a>
+                    <a href="pages/microservices/event-driven.html" class="sidebar-item">Event-Driven Architecture</a>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-header">
+                    <i class="fas fa-drafting-compass"></i>
+                    <span>Software Architecture</span>
+                    <button class="collapse-btn">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div class="sidebar-submenu">
+                    <a href="pages/architecture/clean-architecture.html" class="sidebar-item">Clean Architecture</a>
+                    <a href="pages/architecture/hexagonal.html" class="sidebar-item">Hexagonal Architecture</a>
+                    <a href="pages/architecture/layered.html" class="sidebar-item">Layered Architecture</a>
+                    <a href="pages/architecture/event-sourcing.html" class="sidebar-item">Event Sourcing</a>
+                    <a href="pages/architecture/cqrs.html" class="sidebar-item">CQRS Pattern</a>
+                    <a href="pages/architecture/ddd.html" class="sidebar-item">Domain-Driven Design</a>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-header">
+                    <i class="fas fa-puzzle-piece"></i>
+                    <span>Design Patterns</span>
+                    <button class="collapse-btn">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div class="sidebar-submenu">
+                    <div class="submenu-category">Creational Patterns</div>
+                    <a href="pages/patterns/singleton.html" class="sidebar-item">Singleton</a>
+                    <a href="pages/patterns/factory-method.html" class="sidebar-item">Factory Method</a>
+                    <a href="pages/patterns/abstract-factory.html" class="sidebar-item">Abstract Factory</a>
+                    <a href="pages/patterns/builder.html" class="sidebar-item">Builder</a>
+
+                    <div class="submenu-category">Structural Patterns</div>
+                    <a href="pages/patterns/adapter.html" class="sidebar-item">Adapter</a>
+                    <a href="pages/patterns/bridge.html" class="sidebar-item">Bridge</a>
+                    <a href="pages/patterns/decorator.html" class="sidebar-item">Decorator</a>
+                    <a href="pages/patterns/facade.html" class="sidebar-item">Facade</a>
+
+                    <div class="submenu-category">Behavioral Patterns</div>
+                    <a href="pages/patterns/strategy.html" class="sidebar-item">Strategy</a>
+                    <a href="pages/patterns/template-method.html" class="sidebar-item">Template Method</a>
+                    <a href="pages/patterns/command.html" class="sidebar-item">Command</a>
+                    <a href="pages/patterns/mediator.html" class="sidebar-item">Mediator</a>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-header">
+                    <i class="fab fa-docker"></i>
+                    <span>Docker</span>
+                    <button class="collapse-btn">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div class="sidebar-submenu">
+                    <a href="pages/docker/basics.html" class="sidebar-item">Docker Basics</a>
+                    <a href="pages/docker/dockerfile.html" class="sidebar-item">Dockerfile Best Practices</a>
+                    <a href="pages/docker/compose.html" class="sidebar-item">Docker Compose</a>
+                    <a href="pages/docker/networking.html" class="sidebar-item">Docker Networking</a>
+                    <a href="pages/docker/volumes.html" class="sidebar-item">Volumes & Data</a>
+                    <a href="pages/docker/multi-stage.html" class="sidebar-item">Multi-Stage Builds</a>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-header">
+                    <i class="fas fa-dharmachakra"></i>
+                    <span>Kubernetes</span>
+                    <button class="collapse-btn">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div class="sidebar-submenu">
+                    <a href="pages/kubernetes/introduction.html" class="sidebar-item">K8s Introduction</a>
+                    <a href="pages/kubernetes/pods.html" class="sidebar-item">Pods & Deployments</a>
+                    <a href="pages/kubernetes/services.html" class="sidebar-item">Services & Networking</a>
+                    <a href="pages/kubernetes/configmaps.html" class="sidebar-item">ConfigMaps & Secrets</a>
+                    <a href="pages/kubernetes/ingress.html" class="sidebar-item">Ingress Controllers</a>
+                    <a href="pages/kubernetes/helm.html" class="sidebar-item">Helm Charts</a>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-header">
+                    <i class="fab fa-microsoft"></i>
+                    <span>.NET Development</span>
+                    <button class="collapse-btn">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div class="sidebar-submenu">
+                    <a href="pages/dotnet/aspnet-core.html" class="sidebar-item">ASP.NET Core</a>
+                    <a href="pages/dotnet/ef-core.html" class="sidebar-item">Entity Framework Core</a>
+                    <a href="pages/dotnet/minimal-api.html" class="sidebar-item">Minimal APIs</a>
+                    <a href="pages/dotnet/middleware.html" class="sidebar-item">Middleware Pipeline</a>
+                    <a href="pages/dotnet/dependency-injection.html" class="sidebar-item">Dependency Injection</a>
+                    <a href="pages/dotnet/testing.html" class="sidebar-item">Unit Testing</a>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-header">
+                    <i class="fas fa-gopuram"></i>
+                    <span>Go Development</span>
+                    <button class="collapse-btn">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div class="sidebar-submenu">
+                    <a href="pages/go/goroutines.html" class="sidebar-item">Goroutines & Concurrency</a>
+                    <a href="pages/go/channels.html" class="sidebar-item">Channels & Select</a>
+                    <a href="pages/go/rest-api-gin.html" class="sidebar-item">REST API with Gin</a>
+                    <a href="pages/go/gorm.html" class="sidebar-item">GORM ORM</a>
+                    <a href="pages/go/testing.html" class="sidebar-item">Testing & Benchmarks</a>
+                    <a href="pages/go/modules.html" class="sidebar-item">Go Modules & Packages</a>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-header">
+                    <i class="fab fa-node-js"></i>
+                    <span>Node.js Development</span>
+                    <button class="collapse-btn">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div class="sidebar-submenu">
+                    <a href="pages/nodejs/express.html" class="sidebar-item">Express.js Framework</a>
+                    <a href="pages/nodejs/nestjs.html" class="sidebar-item">NestJS Framework</a>
+                    <a href="pages/nodejs/async-patterns.html" class="sidebar-item">Async Patterns & Promises</a>
+                    <a href="pages/nodejs/prisma.html" class="sidebar-item">Prisma ORM</a>
+                    <a href="pages/nodejs/testing.html" class="sidebar-item">Jest & Testing</a>
+                    <a href="pages/nodejs/npm-packages.html" class="sidebar-item">NPM & Package Management</a>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-header">
+                    <i class="fab fa-python"></i>
+                    <span>Python Development</span>
+                    <button class="collapse-btn">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div class="sidebar-submenu">
+                    <a href="pages/python/fastapi.html" class="sidebar-item">FastAPI Framework</a>
+                    <a href="pages/python/django.html" class="sidebar-item">Django Framework</a>
+                    <a href="pages/python/async.html" class="sidebar-item">Async Programming</a>
+                    <a href="pages/python/sqlalchemy.html" class="sidebar-item">SQLAlchemy ORM</a>
+                    <a href="pages/python/celery.html" class="sidebar-item">Celery Tasks</a>
+                    <a href="pages/python/testing.html" class="sidebar-item">Pytest</a>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-header">
+                    <i class="fas fa-database"></i>
+                    <span>Databases</span>
+                    <button class="collapse-btn">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div class="sidebar-submenu">
+                    <a href="pages/database/sql-fundamentals.html" class="sidebar-item">SQL Fundamentals</a>
+                    <a href="pages/database/postgresql.html" class="sidebar-item">PostgreSQL</a>
+                    <a href="pages/database/mongodb.html" class="sidebar-item">MongoDB</a>
+                    <a href="pages/database/redis.html" class="sidebar-item">Redis</a>
+                    <a href="pages/database/indexing.html" class="sidebar-item">Indexing Strategies</a>
+                    <a href="pages/database/transactions.html" class="sidebar-item">Transactions & ACID</a>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-header">
+                    <i class="fas fa-rocket"></i>
+                    <span>DevOps & CI/CD</span>
+                    <button class="collapse-btn">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div class="sidebar-submenu">
+                    <a href="pages/devops/git.html" class="sidebar-item">Git Workflow</a>
+                    <a href="pages/devops/github-actions.html" class="sidebar-item">GitHub Actions</a>
+                    <a href="pages/devops/jenkins.html" class="sidebar-item">Jenkins Pipeline</a>
+                    <a href="pages/devops/terraform.html" class="sidebar-item">Terraform IaC</a>
+                    <a href="pages/devops/monitoring.html" class="sidebar-item">Monitoring & Logging</a>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <a href="pages/cheat-sheets.html" class="sidebar-item">
+                    <i class="fas fa-file-code"></i>
+                    <span>Cheat Sheets</span>
+                </a>
+                <a href="pages/best-practices.html" class="sidebar-item">
+                    <i class="fas fa-star"></i>
+                    <span>Best Practices</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="welcome-section">
+                <h1>Hi, I'm Superbackend Developer.</h1>
+                <div class="avatar-container">
+                    <img src="../images/svg-animation-pict.svg" alt="Hanung" class="avatar">
+                </div>
+            </div>
+
+            <div class="intro-text">
+                <p>
+                    This wiki is a collection of my personal notes, tutorials, and projects. One of the goals in
+                    establishing this wiki
+                    is to document the projects I am currently undertaking or researching.
+                </p>
+                <p>
+                    Not only that, but you can also find various programming tutorials, both basic and advanced, on this
+                    wiki. The
+                    next step is to visit the <a href="pages/content-list.html">Table of Content</a> to see the list of
+                    available articles.
+                </p>
+                <p>
+                    All resources you access on this wiki are free and open source. Provide feedback to me in developing
+                    this
+                    wiki. Visit the Table of Content to see the list of available articles. Some articles are quite
+                    useful.
+                </p>
+                <p>
+                    Go to see list of <a href="pages/content-list.html">Table of Content</a>.
+                </p>
+            </div>
+
+            <section class="interesting-section">
+                <h2>Interesting Articles</h2>
+                <div class="card-grid">
+                    <a href="pages/tools/docker.html" class="article-card docker">
+                        <div class="card-icon">
+                            <i class="fab fa-docker"></i>
+                        </div>
+                        <h3>Docker</h3>
+                        <p>Containerization platform for building, shipping, and running applications</p>
+                    </a>
+
+                    <a href="pages/dotnet/getting-started.html" class="article-card dotnet">
+                        <div class="card-icon">
+                            <i class="fab fa-microsoft"></i>
+                        </div>
+                        <h3>Microsoft .NET</h3>
+                        <p>Open-source developer platform for building many types of applications</p>
+                    </a>
+
+                    <a href="pages/dotnet/ef-core.html" class="article-card ef-core">
+                        <div class="card-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <h3>Entity Framework</h3>
+                        <p>Modern object-database mapper for .NET</p>
+                    </a>
+
+                    <a href="pages/python/fastapi.html" class="article-card python">
+                        <div class="card-icon">
+                            <i class="fab fa-python"></i>
+                        </div>
+                        <h3>FastAPI</h3>
+                        <p>Modern, fast web framework for building APIs with Python</p>
+                    </a>
+
+                    <a href="pages/microservices.html" class="article-card microservices">
+                        <div class="card-icon">
+                            <i class="fas fa-cubes"></i>
+                        </div>
+                        <h3>Microservices</h3>
+                        <p>Architectural style for building distributed systems</p>
+                    </a>
+
+                    <a href="pages/golang/gin.html" class="article-card golang">
+                        <div class="card-icon">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <h3>Golang Gin</h3>
+                        <p>High-performance HTTP web framework written in Go</p>
+                    </a>
+                </div>
+            </section>
+
+            <section class="recent-updates">
+                <h2>Recent Updates</h2>
+                <div class="updates-list">
+                    <div class="update-item">
+                        <div class="update-date">Nov 25, 2025</div>
+                        <div class="update-content">
+                            <h4><a href="pages/microservices.html">Microservices Architecture</a></h4>
+                            <p>Added comprehensive guide on microservices patterns and best practices</p>
+                        </div>
+                    </div>
+                    <div class="update-item">
+                        <div class="update-date">Nov 24, 2025</div>
+                        <div class="update-content">
+                            <h4><a href="pages/dotnet/ef-core.html">Entity Framework Core</a></h4>
+                            <p>Updated with EF Core 8.0 features and performance tips</p>
+                        </div>
+                    </div>
+                    <div class="update-item">
+                        <div class="update-date">Nov 23, 2025</div>
+                        <div class="update-content">
+                            <h4><a href="pages/python/fastapi.html">FastAPI Tutorial</a></h4>
+                            <p>Complete guide to building REST APIs with FastAPI and async support</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>

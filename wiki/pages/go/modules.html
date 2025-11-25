@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go Modules & Packages - Go Development</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div id="sidebarContainer"></div>
+
+    <div class="container">
+        <main class="content">
+            <div class="page-header">
+                <div class="breadcrumb">
+                    <a href="../../index.html">Home</a>
+                    <span>/</span>
+                    <a href="#">Go Development</a>
+                    <span>/</span>
+                    <span>Go Modules & Packages</span>
+                </div>
+                <h1><i class="fas fa-box"></i> Go Modules & Package Management</h1>
+                <p class="page-description">Master Go's dependency management with modules, versioning, and best
+                    practices for organizing your code.</p>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-rocket"></i> Initializing a Go Module</h2>
+                <pre><code># Create a new module
+go mod init github.com/username/projectname
+
+# This creates go.mod file:
+module github.com/username/projectname
+
+go 1.21
+
+# Add dependencies
+go get github.com/gin-gonic/gin@latest
+go get github.com/stretchr/testify@v1.8.4
+
+# Remove unused dependencies
+go mod tidy
+
+# View module graph
+go mod graph</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-file-code"></i> go.mod File Structure</h2>
+                <pre><code>module github.com/username/myapp
+
+go 1.21
+
+require (
+    github.com/gin-gonic/gin v1.9.1
+    github.com/stretchr/testify v1.8.4
+    gorm.io/gorm v1.25.5
+    gorm.io/driver/postgres v1.5.4
+)
+
+require (
+    // Indirect dependencies
+    github.com/bytedance/sonic v1.10.2 // indirect
+    github.com/gabriel-vasile/mimetype v1.4.3 // indirect
+    ...
+)
+
+// Replace directive (for local development)
+replace github.com/username/mylib => ../mylib
+
+// Exclude specific version
+exclude github.com/problematic/package v1.2.3</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa=" code"></i> Package Organization</h2>
+                <p>Best practices for structuring your Go projects:</p>
+
+                <pre><code>myapp/
+├── cmd/
+│   ├── api/              # Main application for API server
+│   │   └── main.go
+│   └── worker/           # Main application for background worker
+│       └── main.go
+├── internal/             # Private application code
+│   ├── domain/          # Business logic & entities
+│   │   ├── user/
+│   │   │   ├── user.go
+│   │   │   ├── repository.go
+│   │   │   └── service.go
+│   │   └── order/
+│   │       ├── order.go
+│   │       └── service.go
+│   ├── infrastructure/  # External dependencies
+│   │   ├── database/
+│   │   │   └── postgres.go
+│   │   ├── cache/
+│   │   │   └── redis.go
+│   │   └── http/
+│   │       └── client.go
+│   └── handlers/        # HTTP handlers
+│       ├── user.go
+│       └── order.go
+├── pkg/                 # Public, reusable packages
+│   ├── logger/
+│   │   └── logger.go
+│   ├── validator/
+│   │   └── validator.go
+│   └── middleware/
+│       ├── auth.go
+│       └── cors.go
+├── api/                 # API specs (OpenAPI, Protocol Buffers)
+│   └── openapi.yaml
+├── configs/             # Configuration files
+│   └── config.yaml
+├── migrations/          # Database migrations
+│   ├── 001_create_users.up.sql
+│   └── 001_create_users.down.sql
+├── scripts/             # Build and deployment scripts
+│   └── build.sh
+├── tests/               # Integration tests
+│   └── integration/
+├── go.mod
+├── go.sum
+└── README.md</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-folder"></i> Creating Packages</h2>
+                <pre><code>// pkg/logger/logger.go
+package logger
+
+import (
+    "log"
+    "os"
+)
+
+type Logger struct {
+    info  *log.Logger
+    error *log.Logger
+}
+
+func New() *Logger {
+    return &Logger{
+        info:  log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime),
+        error: log.New(os.Stderr, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile),
+    }
+}
+
+func (l *Logger) Info(msg string) {
+    l.info.Println(msg)
+}
+
+func (l *Logger) Error(msg string) {
+    l.error.Println(msg)
+}
+
+// Usage in another package
+package main
+
+import (
+    "github.com/username/myapp/pkg/logger"
+)
+
+func main() {
+    log := logger.New()
+    log.Info("Application started")
+    log.Error("Something went wrong")
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-lock"></i> Internal Packages</h2>
+                <p>The <code>internal</code> directory is special - its packages can only be imported by code in the
+                    parent tree:</p>
+
+                <pre><code>// This works
+myapp/cmd/api/main.go can import myapp/internal/handlers
+
+// This DOESN'T work
+github.com/otheruser/otherapp cannot import myapp/internal/handlers
+
+// Example structure
+myapp/
+├── internal/
+│   └── secret/
+│       └── secret.go    # Only accessible within myapp
+└── cmd/
+    └── main.go         # Can import internal/secret
+
+// internal/secret/secret.go
+package secret
+
+func EncryptPassword(password string) string {
+    // Implementation only for this application
+    return encrypted
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-code-branch"></i> Versioning & Publishing</h2>
+                <pre><code># Semantic Versioning
+v1.2.3
+│ │ │
+│ │ └─ Patch: Bug fixes
+│ └─── Minor: New features (backward compatible)
+└───── Major: Breaking changes
+
+# Tag a release
+git tag v1.0.0
+git push origin v1.0.0
+
+# Users install specific version
+go get github.com/username/mypackage@v1.0.0
+
+# Get latest
+go get github.com/username/mypackage@latest
+
+# Major version changes (v2+)
+# Update module path in go.mod:
+module github.com/username/mypackage/v2
+
+go 1.21
+
+# Users import with version:
+import "github.com/username/mypackage/v2"</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-download"></i> Dependency Management</h2>
+                <pre><code># Download all dependencies
+go mod download
+
+# Verify dependencies
+go mod verify
+
+# View available versions
+go list -m -versions github.com/gin-gonic/gin
+
+# Update dependency
+go get -u github.com/gin-gonic/gin
+
+# Update all dependencies
+go get -u ./...
+
+# Downgrade dependency
+go get github.com/gin-gonic/gin@v1.8.0
+
+# Use vendoring (copy dependencies into project)
+go mod vendor
+
+# Build using vendor directory
+go build -mod=vendor</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-tools"></i> Working with Local Modules</h2>
+                <pre><code># Scenario: Testing changes in a dependency locally
+
+# 1. Clone the dependency
+git clone github.com/username/mylib
+cd mylib
+# Make changes...
+
+# 2. In your main project's go.mod, add replace directive:
+module github.com/username/myapp
+
+go 1.21
+
+require github.com/username/mylib v1.0.0
+
+replace github.com/username/mylib => ../mylib
+
+# 3. Use the local version
+go mod tidy
+
+# 4. Before committing, remove the replace directive
+# and use the actual version from the repository</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-shield-alt"></i> Private Modules</h2>
+                <pre><code># Configure Go to access private repositories
+
+# Set GOPRIVATE environment variable
+export GOPRIVATE=github.com/yourcompany/*
+
+# Or in go.env
+GOPRIVATE=github.com/yourcompany/*,gitlab.com/yourcompany/*
+
+# Configure Git credentials
+git config --global url."https://${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
+
+# Use .netrc for authentication
+# ~/.netrc
+machine github.com
+login your-username
+password your-token
+
+# Use SSH instead of HTTPS
+git config --global url."git@github.com:".insteadOf "https://github.com/"</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-file-alt"></i> Documentation</h2>
+                <pre><code>// Package documentation appears before package declaration
+// Package logger provides structured logging functionality
+// with support for different log levels and outputs.
+//
+// Basic usage:
+//
+//     log := logger.New()
+//     log.Info("Application started")
+//     log.Error("An error occurred")
+package logger
+
+import "fmt"
+
+// Logger handles application logging.
+// It supports multiple log levels and outputs.
+type Logger struct {
+    level Level
+}
+
+// New creates a new Logger instance with default settings.
+// The logger is configured with INFO level by default.
+func New() *Logger {
+    return &Logger{level: InfoLevel}
+}
+
+// Info logs an informational message.
+// This should be used for general application flow information.
+func (l *Logger) Info(msg string) {
+    fmt.Println("INFO:", msg)
+}
+
+// View documentation
+# In browser
+go doc -http=:6060
+# Then visit http://localhost:6060/pkg/yourpackage/
+
+# In terminal
+go doc logger
+go doc logger.New
+go doc logger.Logger.Info</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-check-circle"></i> Best Practices</h2>
+                <div class="tip-box">
+                    <ul>
+                        <li>✅ Run <code>go mod tidy</code> regularly to keep dependencies clean</li>
+                        <li>✅ Commit both go.mod and go.sum to version control</li>
+                        <li>✅ Use semantic versioning for your packages</li>
+                        <li>✅ Keep the <code>internal</code> directory for private code</li>
+                        <li>✅ Put reusable code in <code>pkg</code> directory</li>
+                        <li>✅ Use meaningful package names (short, lowercase, no underscores)</li>
+                        <li>✅ One package per directory</li>
+                        <li>✅ Document exported functions, types, and packages</li>
+                        <li>✅ Avoid circular dependencies between packages</li>
+                        <li>✅ Use vendoring for reproducible builds</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="navigation-links">
+                <a href="testing.html" class="nav-link"><i class="fas fa-arrow-left"></i> Previous: Testing</a>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebar = doc.querySelector('.sidebar');
+                if (sidebar) {
+                    document.getElementById('sidebarContainer').appendChild(sidebar);
+                    const event = new Event('sidebarLoaded');
+                    document.dispatchEvent(event);
+                }
+            });
+    </script>
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>

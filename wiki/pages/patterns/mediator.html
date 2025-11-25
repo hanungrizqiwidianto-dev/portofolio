@@ -1,0 +1,380 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mediator Pattern - Developer Wiki</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+
+<body>
+    <div class="wiki-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-book"></i> Wiki</h2>
+                <button class="close-sidebar" id="closeSidebar"><i class="fas fa-times"></i></button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="../../index.html"><i class="fas fa-home"></i> Home</a>
+                <a href="../getting-started.html"><i class="fas fa-rocket"></i> Getting Started</a>
+
+                <div class="sidebar-section">
+                    <h3 class="section-header"><i class="fas fa-shapes"></i> Design Patterns</h3>
+                    <div class="sidebar-submenu">
+                        <div class="submenu-category">
+                            <h4>Creational</h4>
+                            <a href="builder.html">Builder</a>
+                            <a href="factory-method.html">Factory Method</a>
+                            <a href="singleton.html">Singleton</a>
+                            <a href="abstract-factory.html">Abstract Factory</a>
+                        </div>
+                        <div class="submenu-category">
+                            <h4>Structural</h4>
+                            <a href="adapter.html">Adapter</a>
+                            <a href="bridge.html">Bridge</a>
+                            <a href="decorator.html">Decorator</a>
+                            <a href="facade.html">Facade</a>
+                        </div>
+                        <div class="submenu-category">
+                            <h4>Behavioral</h4>
+                            <a href="strategy.html">Strategy</a>
+                            <a href="template-method.html">Template Method</a>
+                            <a href="command.html">Command</a>
+                            <a href="mediator.html" class="active">Mediator</a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <button class="toggle-sidebar" id="toggleSidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <article class="doc-article">
+                <div class="breadcrumb">
+                    <a href="../../index.html">Home</a> / <a href="../../index.html#patterns">Design Patterns</a> /
+                    Mediator
+                </div>
+
+                <h1>Mediator Pattern</h1>
+                <div class="doc-meta">
+                    <span class="badge badge-behavioral">Behavioral</span>
+                    <span class="badge badge-intermediate">Intermediate</span>
+                </div>
+
+                <section class="doc-section">
+                    <h2>Overview</h2>
+                    <p>Mediator pattern mengurangi chaotic dependencies antara objects. Pattern ini membatasi direct
+                        communications antara objects dan memaksa mereka untuk collaborate hanya melalui mediator
+                        object. Ini mengurangi coupling antara components.</p>
+
+                    <div class="info-box">
+                        <strong>Analogi:</strong> Seperti air traffic controller di bandara. Pilot pesawat tidak
+                        berkomunikasi langsung satu sama lain (yang akan chaotic), melainkan semua berkomunikasi dengan
+                        control tower yang mengkoordinasikan semua pesawat.
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Problem</h2>
+                    <p>Ketika Anda memiliki many-to-many relationships antara objects, code menjadi sulit dipahami dan
+                        dimodifikasi. Setiap object harus aware of dan communicate dengan banyak objects lain, creating
+                        tight coupling dan making reuse difficult.</p>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Solution</h2>
+                    <p>Buat mediator object yang encapsulates interaction logic antara different objects. Objects tidak
+                        communicate langsung satu sama lain, tetapi melalui mediator. Mediator mengetahui semua objects
+                        dan mengkoordinasikan operations mereka.</p>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Implementation (C#)</h2>
+                    <pre><code class="language-csharp">// Mediator Interface
+public interface IChatMediator
+{
+    void SendMessage(string message, User user);
+    void AddUser(User user);
+}
+
+// Concrete Mediator
+public class ChatRoom : IChatMediator
+{
+    private List<User> _users = new List<User>();
+
+    public void AddUser(User user)
+    {
+        _users.Add(user);
+        user.SetMediator(this);
+    }
+
+    public void SendMessage(string message, User sender)
+    {
+        foreach (var user in _users)
+        {
+            // Don't send message to the sender
+            if (user != sender)
+            {
+                user.Receive(message, sender.Name);
+            }
+        }
+    }
+}
+
+// Colleague - Base User
+public abstract class User
+{
+    protected IChatMediator _mediator;
+    public string Name { get; }
+
+    public User(string name)
+    {
+        Name = name;
+    }
+
+    public void SetMediator(IChatMediator mediator)
+    {
+        _mediator = mediator;
+    }
+
+    public abstract void Send(string message);
+    public abstract void Receive(string message, string senderName);
+}
+
+// Concrete Colleagues
+public class RegularUser : User
+{
+    public RegularUser(string name) : base(name) { }
+
+    public override void Send(string message)
+    {
+        Console.WriteLine($"{Name} sends: {message}");
+        _mediator.SendMessage(message, this);
+    }
+
+    public override void Receive(string message, string senderName)
+    {
+        Console.WriteLine($"{Name} received from {senderName}: {message}");
+    }
+}
+
+public class PremiumUser : User
+{
+    public PremiumUser(string name) : base(name) { }
+
+    public override void Send(string message)
+    {
+        Console.WriteLine($"⭐ {Name} sends: {message}");
+        _mediator.SendMessage($"⭐ {message}", this);
+    }
+
+    public override void Receive(string message, string senderName)
+    {
+        Console.WriteLine($"⭐ {Name} received from {senderName}: {message}");
+    }
+}
+
+// Usage
+var chatRoom = new ChatRoom();
+
+var alice = new RegularUser("Alice");
+var bob = new RegularUser("Bob");
+var charlie = new PremiumUser("Charlie");
+
+chatRoom.AddUser(alice);
+chatRoom.AddUser(bob);
+chatRoom.AddUser(charlie);
+
+alice.Send("Hello everyone!");
+charlie.Send("Hi from premium user!");</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Implementation (Python)</h2>
+                    <pre><code class="language-python">from abc import ABC, abstractmethod
+from typing import List
+
+# Mediator Interface
+class IChatMediator(ABC):
+    @abstractmethod
+    def send_message(self, message: str, user: 'User') -> None:
+        pass
+    
+    @abstractmethod
+    def add_user(self, user: 'User') -> None:
+        pass
+
+# Concrete Mediator
+class ChatRoom(IChatMediator):
+    def __init__(self):
+        self._users: List[User] = []
+    
+    def add_user(self, user: 'User') -> None:
+        self._users.append(user)
+        user.set_mediator(self)
+    
+    def send_message(self, message: str, sender: 'User') -> None:
+        for user in self._users:
+            if user != sender:
+                user.receive(message, sender.name)
+
+# Colleague - Base User
+class User(ABC):
+    def __init__(self, name: str):
+        self.name = name
+        self._mediator: IChatMediator = None
+    
+    def set_mediator(self, mediator: IChatMediator) -> None:
+        self._mediator = mediator
+    
+    @abstractmethod
+    def send(self, message: str) -> None:
+        pass
+    
+    @abstractmethod
+    def receive(self, message: str, sender_name: str) -> None:
+        pass
+
+# Concrete Colleagues
+class RegularUser(User):
+    def send(self, message: str) -> None:
+        print(f"{self.name} sends: {message}")
+        self._mediator.send_message(message, self)
+    
+    def receive(self, message: str, sender_name: str) -> None:
+        print(f"{self.name} received from {sender_name}: {message}")
+
+class PremiumUser(User):
+    def send(self, message: str) -> None:
+        print(f"⭐ {self.name} sends: {message}")
+        self._mediator.send_message(f"⭐ {message}", self)
+    
+    def receive(self, message: str, sender_name: str) -> None:
+        print(f"⭐ {self.name} received from {sender_name}: {message}")
+
+# Usage
+chat_room = ChatRoom()
+
+alice = RegularUser("Alice")
+bob = RegularUser("Bob")
+charlie = PremiumUser("Charlie")
+
+chat_room.add_user(alice)
+chat_room.add_user(bob)
+chat_room.add_user(charlie)
+
+alice.send("Hello everyone!")
+charlie.send("Hi from premium user!")</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Real-World Examples</h2>
+                    <ul>
+                        <li><strong>Chat Applications:</strong> Chat room mediates messages antara users tanpa mereka
+                            perlu tahu satu sama lain</li>
+                        <li><strong>MVC Framework:</strong> Controller bertindak sebagai mediator antara Model dan View
+                        </li>
+                        <li><strong>Air Traffic Control:</strong> Tower mengkoordinasikan communication antara
+                            pesawat-pesawat</li>
+                        <li><strong>GUI Dialog Boxes:</strong> Dialog mediates interactions antara berbagai UI
+                            components (buttons, textboxes, checkboxes)</li>
+                        <li><strong>Event Bus/Message Bus:</strong> Central bus mediates events antara loosely-coupled
+                            components</li>
+                    </ul>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Pros and Cons</h2>
+                    <div class="pros-cons-grid">
+                        <div class="pros">
+                            <h3><i class="fas fa-check-circle"></i> Pros</h3>
+                            <ul>
+                                <li>Single Responsibility - communication logic extracted ke satu place</li>
+                                <li>Open/Closed - dapat introduce mediators baru tanpa mengubah components</li>
+                                <li>Reduces coupling antara components</li>
+                                <li>Components lebih reusable karena tidak tightly coupled</li>
+                                <li>Simplified object protocols dari many-to-many ke one-to-many</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h3><i class="fas fa-times-circle"></i> Cons</h3>
+                            <ul>
+                                <li>Mediator dapat berkembang menjadi "God Object" yang terlalu complex</li>
+                                <li>Centralized control dapat menjadi bottleneck</li>
+                                <li>Sulit untuk maintain jika mediator logic terlalu complicated</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Mediator vs Observer</h2>
+                    <p><strong>Mediator:</strong> Centralized communication hub. Objects actively communicate melalui
+                        mediator.</p>
+                    <p><strong>Observer:</strong> Distributed event handling. Observers passively react ke events dari
+                        subjects.</p>
+                </section>
+
+                <div class="doc-navigation">
+                    <a href="command.html" class="nav-prev"><i class="fas fa-arrow-left"></i> Command</a>
+                    <a href="builder.html" class="nav-next">Back to Builder <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </article>
+        </main>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                document.getElementById('sidebar').innerHTML = sidebarContent;
+                
+                // Re-run sidebar initialization from main.js
+                const event = new Event('sidebarLoaded');
+                document.dispatchEvent(event);
+            });
+    </script>
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                const sidebarElement = document.getElementById('sidebar');
+                
+                if (sidebarElement) {
+                    sidebarElement.innerHTML = sidebarContent;
+                    console.log('âœ… Sidebar loaded successfully');
+                    
+                    // Dispatch event after sidebar is loaded
+                    const event = new Event('sidebarLoaded');
+                    document.dispatchEvent(event);
+                } else {
+                    console.error('âŒ Sidebar element not found');
+                }
+            })
+            .catch(error => {
+                console.error('âŒ Error loading sidebar:', error);
+            });
+    </script>
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>

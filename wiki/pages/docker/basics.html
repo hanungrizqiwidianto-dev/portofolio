@@ -1,0 +1,352 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker Basics - Hanung's Dev Wiki</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-left">
+            <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+            <a href="../../index.html" class="logo"><i class="fas fa-code"></i><span>Hanung's Dev Wiki</span></a>
+        </div>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar" id="sidebar"></aside>
+        <main class="main-content">
+            <div class="breadcrumb">
+                <a href="../../index.html">Home</a><span>/</span>
+                <a href="#">Docker</a><span>/</span>
+                <span>Docker Basics</span>
+            </div>
+
+            <article class="doc-article">
+                <h1>Docker Basics</h1>
+                <div class="doc-meta">
+                    <span class="badge badge-docker">Docker</span>
+                    <span class="doc-date"><i class="fas fa-calendar"></i> Updated: Nov 25, 2025</span>
+                </div>
+
+                <section class="doc-section">
+                    <h2>What is Docker?</h2>
+                    <p>
+                        <strong>Docker</strong> is an open-source platform that automates the deployment of applications
+                        inside lightweight, portable containers. Containers package software and all its dependencies
+                        so the application runs quickly and reliably across computing environments.
+                    </p>
+                    <div class="info-box">
+                        <i class="fab fa-docker"></i>
+                        <div>
+                            <strong>Key Benefits:</strong> Consistency across environments, isolation, portability,
+                            efficient resource utilization, and rapid deployment.
+                        </div>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Docker Architecture</h2>
+                    <div class="diagram-box">
+                        <pre>
+┌──────────────────────────────────────────────┐
+│           Docker Client (CLI)                │
+└─────────────────┬────────────────────────────┘
+                  │ docker commands
+                  ▼
+┌──────────────────────────────────────────────┐
+│           Docker Daemon (dockerd)            │
+├──────────────────────────────────────────────┤
+│  ┌────────────┐  ┌────────────┐            │
+│  │ Container 1│  │ Container 2│  ...       │
+│  └────────────┘  └────────────┘            │
+│                                             │
+│  ┌─────────────────────────────────────┐   │
+│  │         Docker Images               │   │
+│  └─────────────────────────────────────┘   │
+└──────────────────────────────────────────────┘
+                  │
+                  ▼
+┌──────────────────────────────────────────────┐
+│        Docker Registry (Docker Hub)          │
+└──────────────────────────────────────────────┘
+                        </pre>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Essential Docker Commands</h2>
+
+                    <h3>Working with Images</h3>
+                    <pre><code class="language-bash"># Pull an image from Docker Hub
+docker pull nginx:latest
+
+# List all images
+docker images
+
+# Remove an image
+docker rmi nginx:latest
+
+# Build an image from Dockerfile
+docker build -t my-app:1.0 .
+
+# Tag an image
+docker tag my-app:1.0 username/my-app:1.0
+
+# Push image to registry
+docker push username/my-app:1.0</code></pre>
+
+                    <h3>Working with Containers</h3>
+                    <pre><code class="language-bash"># Run a container
+docker run -d --name my-nginx -p 8080:80 nginx
+
+# List running containers
+docker ps
+
+# List all containers (including stopped)
+docker ps -a
+
+# Stop a container
+docker stop my-nginx
+
+# Start a stopped container
+docker start my-nginx
+
+# Restart a container
+docker restart my-nginx
+
+# Remove a container
+docker rm my-nginx
+
+# Remove all stopped containers
+docker container prune</code></pre>
+
+                    <h3>Container Logs and Execution</h3>
+                    <pre><code class="language-bash"># View container logs
+docker logs my-nginx
+
+# Follow container logs
+docker logs -f my-nginx
+
+# Execute command in running container
+docker exec -it my-nginx bash
+
+# View container resource usage
+docker stats
+
+# Inspect container details
+docker inspect my-nginx</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Creating a Simple Dockerfile</h2>
+                    <pre><code class="language-dockerfile"># Use official Python runtime as base image
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements file
+COPY requirements.txt .
+
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY . .
+
+# Expose port
+EXPOSE 8000
+
+# Define environment variable
+ENV PYTHONUNBUFFERED=1
+
+# Run application
+CMD ["python", "app.py"]</code></pre>
+
+                    <h3>Build and Run</h3>
+                    <pre><code class="language-bash"># Build the image
+docker build -t my-python-app:1.0 .
+
+# Run the container
+docker run -d -p 8000:8000 --name python-app my-python-app:1.0</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Docker Volumes</h2>
+                    <p>Volumes are the preferred mechanism for persisting data generated by and used by Docker
+                        containers.</p>
+
+                    <pre><code class="language-bash"># Create a volume
+docker volume create my-data
+
+# List volumes
+docker volume ls
+
+# Run container with volume
+docker run -d \
+  --name postgres-db \
+  -v my-data:/var/lib/postgresql/data \
+  -e POSTGRES_PASSWORD=mysecret \
+  postgres:15
+
+# Inspect volume
+docker volume inspect my-data
+
+# Remove volume
+docker volume rm my-data</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Docker Networks</h2>
+                    <p>Docker networks allow containers to communicate with each other.</p>
+
+                    <pre><code class="language-bash"># Create a network
+docker network create my-network
+
+# List networks
+docker network ls
+
+# Run containers on same network
+docker run -d --name web --network my-network nginx
+docker run -d --name api --network my-network my-api:1.0
+
+# Containers can now communicate using container names
+# web can reach api at: http://api:port
+
+# Inspect network
+docker network inspect my-network
+
+# Remove network
+docker network rm my-network</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>ASP.NET Core Example</h2>
+                    <pre><code class="language-dockerfile"># Multi-stage build for ASP.NET Core
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+# Copy csproj and restore dependencies
+COPY ["MyApp/MyApp.csproj", "MyApp/"]
+RUN dotnet restore "MyApp/MyApp.csproj"
+
+# Copy everything else and build
+COPY . .
+WORKDIR "/src/MyApp"
+RUN dotnet build "MyApp.csproj" -c Release -o /app/build
+
+# Publish
+FROM build AS publish
+RUN dotnet publish "MyApp.csproj" -c Release -o /app/publish
+
+# Runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "MyApp.dll"]</code></pre>
+
+                    <h3>Run ASP.NET Core Container</h3>
+                    <pre><code class="language-bash"># Build
+docker build -t myapp:latest .
+
+# Run
+docker run -d -p 5000:80 --name myapp myapp:latest</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Best Practices</h2>
+                    <div class="checklist">
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Use official base images when possible</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Keep images small - use slim or alpine variants</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Use multi-stage builds to reduce image size</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Don't run containers as root</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Use .dockerignore to exclude unnecessary files</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>One process per container</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Use environment variables for configuration</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Tag images with specific versions, not just 'latest'</span>
+                        </div>
+                    </div>
+                </section>
+            </article>
+        </main>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-dockerfile.min.js"></script>
+
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                document.getElementById('sidebar').innerHTML = sidebarContent;
+                
+                // Re-run sidebar initialization from main.js
+                const event = new Event('sidebarLoaded');
+                document.dispatchEvent(event);
+            });
+    </script>
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                const sidebarElement = document.getElementById('sidebar');
+                
+                if (sidebarElement) {
+                    sidebarElement.innerHTML = sidebarContent;
+                    console.log('âœ… Sidebar loaded successfully');
+                    
+                    // Dispatch event after sidebar is loaded
+                    const event = new Event('sidebarLoaded');
+                    document.dispatchEvent(event);
+                } else {
+                    console.error('âŒ Sidebar element not found');
+                }
+            })
+            .catch(error => {
+                console.error('âŒ Error loading sidebar:', error);
+            });
+    </script>
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>

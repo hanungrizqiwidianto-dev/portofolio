@@ -1,0 +1,304 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introduction to Microservices - Hanung's Dev Wiki</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-left">
+            <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+            <a href="../../index.html" class="logo"><i class="fas fa-code"></i><span>Hanung's Dev Wiki</span></a>
+        </div>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar" id="sidebar"></aside>
+        <main class="main-content">
+            <div class="breadcrumb">
+                <a href="../../index.html">Home</a><span>/</span>
+                <a href="#">Microservices</a><span>/</span>
+                <span>Introduction to Microservices</span>
+            </div>
+
+            <article class="doc-article">
+                <h1>Introduction to Microservices</h1>
+                <div class="doc-meta">
+                    <span class="badge badge-microservices">Microservices</span>
+                    <span class="doc-date"><i class="fas fa-calendar"></i> Updated: Nov 25, 2025</span>
+                </div>
+
+                <section class="doc-section">
+                    <h2>What are Microservices?</h2>
+                    <p>
+                        <strong>Microservices</strong> adalah pendekatan arsitektur untuk mengembangkan aplikasi sebagai
+                        kumpulan
+                        layanan kecil yang independen, di mana setiap layanan menjalankan proses sendiri dan
+                        berkomunikasi
+                        menggunakan mekanisme lightweight (biasanya HTTP/REST API).
+                    </p>
+                    <div class="info-box">
+                        <i class="fas fa-lightbulb"></i>
+                        <div>
+                            <strong>Key Principle:</strong> Setiap microservice fokus pada satu business capability,
+                            dapat di-deploy secara independen, dan memiliki database sendiri.
+                        </div>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Monolithic vs Microservices</h2>
+                    <div class="two-column">
+                        <div class="pros-cons-box cons">
+                            <h4><i class="fas fa-cube"></i> Monolithic</h4>
+                            <ul>
+                                <li>Semua code dalam satu aplikasi</li>
+                                <li>Single database</li>
+                                <li>Deploy seluruh aplikasi sekaligus</li>
+                                <li>Scaling harus keseluruhan aplikasi</li>
+                                <li>Technology stack terpusat</li>
+                            </ul>
+                        </div>
+                        <div class="pros-cons-box pros">
+                            <h4><i class="fas fa-cubes"></i> Microservices</h4>
+                            <ul>
+                                <li>Aplikasi terdiri dari banyak services kecil</li>
+                                <li>Database per service</li>
+                                <li>Deploy per service secara independen</li>
+                                <li>Scaling per service sesuai kebutuhan</li>
+                                <li>Technology stack yang beragam</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Karakteristik Microservices</h2>
+                    <div class="checklist">
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span><strong>Componentization via Services</strong> - Aplikasi dipecah menjadi services
+                                yang dapat di-deploy independen</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span><strong>Organized around Business Capabilities</strong> - Tim diorganisir berdasarkan
+                                business domain, bukan technical layer</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span><strong>Products not Projects</strong> - Tim memiliki service dari development hingga
+                                production</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span><strong>Smart endpoints and dumb pipes</strong> - Gunakan komunikasi sederhana
+                                (HTTP/REST)</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span><strong>Decentralized Governance</strong> - Setiap service bisa menggunakan technology
+                                stack berbeda</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span><strong>Decentralized Data Management</strong> - Setiap service memiliki database
+                                sendiri</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span><strong>Infrastructure Automation</strong> - CI/CD pipeline untuk automated testing
+                                dan deployment</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span><strong>Design for Failure</strong> - Service harus resilient terhadap kegagalan
+                                dependencies</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Example Architecture</h2>
+                    <div class="diagram-box">
+                        <pre>
+┌─────────────────────────────────────────────────────────┐
+│                   API Gateway                           │
+│            (Single entry point for clients)             │
+└────┬────────────┬────────────┬────────────┬─────────────┘
+     │            │            │            │
+     ▼            ▼            ▼            ▼
+┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐
+│  User    │ │ Product  │ │  Order   │ │ Payment  │
+│ Service  │ │ Service  │ │ Service  │ │ Service  │
+└────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘
+     │            │            │            │
+     ▼            ▼            ▼            ▼
+┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐
+│  User    │ │ Product  │ │  Order   │ │ Payment  │
+│    DB    │ │    DB    │ │    DB    │ │    DB    │
+└──────────┘ └──────────┘ └──────────┘ └──────────┘
+                        </pre>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Benefits of Microservices</h2>
+                    <div class="pros-cons-box pros">
+                        <h4><i class="fas fa-thumbs-up"></i> Advantages</h4>
+                        <ul>
+                            <li><strong>Independent Deployment</strong> - Deploy service tanpa mempengaruhi yang lain
+                            </li>
+                            <li><strong>Technology Diversity</strong> - Gunakan tech stack yang paling sesuai per
+                                service</li>
+                            <li><strong>Fault Isolation</strong> - Jika satu service down, yang lain tetap berjalan</li>
+                            <li><strong>Scalability</strong> - Scale hanya service yang high-demand</li>
+                            <li><strong>Team Autonomy</strong> - Tim dapat bekerja independen pada service mereka</li>
+                            <li><strong>Easier to Understand</strong> - Codebase lebih kecil dan focused</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Challenges of Microservices</h2>
+                    <div class="pros-cons-box cons">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Challenges</h4>
+                        <ul>
+                            <li><strong>Distributed System Complexity</strong> - Network latency, fault tolerance,
+                                message serialization</li>
+                            <li><strong>Data Consistency</strong> - Distributed transactions sulit, perlu eventual
+                                consistency</li>
+                            <li><strong>Testing</strong> - Integration testing lebih kompleks</li>
+                            <li><strong>Deployment</strong> - Butuh automation yang matang (CI/CD, container
+                                orchestration)</li>
+                            <li><strong>Monitoring</strong> - Perlu centralized logging dan distributed tracing</li>
+                            <li><strong>Service Discovery</strong> - Service perlu menemukan dan berkomunikasi dengan
+                                yang lain</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>When to Use Microservices?</h2>
+                    <div class="example-box">
+                        <h4>✅ Good Use Cases</h4>
+                        <ul>
+                            <li>Aplikasi besar dan kompleks dengan banyak team</li>
+                            <li>Aplikasi yang butuh scale berbeda per component</li>
+                            <li>Aplikasi dengan business domain yang jelas terpisah</li>
+                            <li>Tim yang sudah mature dalam DevOps practices</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>❌ Not Recommended When</h4>
+                        <ul>
+                            <li>Aplikasi sederhana dengan tim kecil</li>
+                            <li>Belum ada infrastructure automation yang matang</li>
+                            <li>Business domain belum jelas atau sering berubah</li>
+                            <li>Tim belum familiar dengan distributed systems</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Best Practices</h2>
+                    <div class="checklist">
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Start with a monolith, migrate to microservices gradually</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Define clear service boundaries based on business capabilities</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Implement API Gateway for client communication</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Use containerization (Docker) and orchestration (Kubernetes)</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Implement centralized logging and distributed tracing</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Design for failure - use circuit breakers and retries</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Automate everything - CI/CD, testing, deployment</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Related Topics</h2>
+                    <ul>
+                        <li><a href="service-discovery.html">Service Discovery</a> - How services find each other</li>
+                        <li><a href="api-gateway.html">API Gateway Pattern</a> - Single entry point for clients</li>
+                        <li><a href="circuit-breaker.html">Circuit Breaker</a> - Handle service failures gracefully</li>
+                        <li><a href="saga-pattern.html">Saga Pattern</a> - Distributed transactions</li>
+                        <li><a href="event-driven.html">Event-Driven Architecture</a> - Async communication between
+                            services</li>
+                    </ul>
+                </section>
+            </article>
+        </main>
+    </div>
+
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                document.getElementById('sidebar').innerHTML = sidebarContent;
+
+                // Re-run sidebar initialization from main.js
+                const event = new Event('sidebarLoaded');
+                document.dispatchEvent(event);
+            });
+    </script>
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                const sidebarElement = document.getElementById('sidebar');
+
+                if (sidebarElement) {
+                    sidebarElement.innerHTML = sidebarContent;
+                    console.log('âœ… Sidebar loaded successfully');
+
+                    // Dispatch event after sidebar is loaded
+                    const event = new Event('sidebarLoaded');
+                    document.dispatchEvent(event);
+                } else {
+                    console.error('âŒ Sidebar element not found');
+                }
+            })
+            .catch(error => {
+                console.error('âŒ Error loading sidebar:', error);
+            });
+    </script>
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>

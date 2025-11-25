@@ -1,0 +1,396 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Command Pattern - Developer Wiki</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+
+<body>
+    <div class="wiki-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-book"></i> Wiki</h2>
+                <button class="close-sidebar" id="closeSidebar"><i class="fas fa-times"></i></button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="../../index.html"><i class="fas fa-home"></i> Home</a>
+                <a href="../getting-started.html"><i class="fas fa-rocket"></i> Getting Started</a>
+
+                <div class="sidebar-section">
+                    <h3 class="section-header"><i class="fas fa-shapes"></i> Design Patterns</h3>
+                    <div class="sidebar-submenu">
+                        <div class="submenu-category">
+                            <h4>Creational</h4>
+                            <a href="builder.html">Builder</a>
+                            <a href="factory-method.html">Factory Method</a>
+                            <a href="singleton.html">Singleton</a>
+                            <a href="abstract-factory.html">Abstract Factory</a>
+                        </div>
+                        <div class="submenu-category">
+                            <h4>Structural</h4>
+                            <a href="adapter.html">Adapter</a>
+                            <a href="bridge.html">Bridge</a>
+                            <a href="decorator.html">Decorator</a>
+                            <a href="facade.html">Facade</a>
+                        </div>
+                        <div class="submenu-category">
+                            <h4>Behavioral</h4>
+                            <a href="strategy.html">Strategy</a>
+                            <a href="template-method.html">Template Method</a>
+                            <a href="command.html" class="active">Command</a>
+                            <a href="mediator.html">Mediator</a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <button class="toggle-sidebar" id="toggleSidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <article class="doc-article">
+                <div class="breadcrumb">
+                    <a href="../../index.html">Home</a> / <a href="../../index.html#patterns">Design Patterns</a> /
+                    Command
+                </div>
+
+                <h1>Command Pattern</h1>
+                <div class="doc-meta">
+                    <span class="badge badge-behavioral">Behavioral</span>
+                    <span class="badge badge-intermediate">Intermediate</span>
+                </div>
+
+                <section class="doc-section">
+                    <h2>Overview</h2>
+                    <p>Command pattern mengubah request menjadi stand-alone object yang berisi semua informasi tentang
+                        request tersebut. Transformation ini memungkinkan Anda untuk parameterize methods dengan
+                        different requests, delay atau queue request execution, dan support undoable operations.</p>
+
+                    <div class="info-box">
+                        <strong>Analogi:</strong> Seperti memesan makanan di restoran. Pelayan menulis order Anda di
+                        kertas (command object), meletakkannya di antrian dapur, dan chef mengeksekusi order tersebut
+                        nanti. Order slip mengandung semua informasi yang dibutuhkan dan dapat di-track, di-cancel, atau
+                        di-modify.
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Problem</h2>
+                    <p>Anda ingin implement operations seperti undo/redo, logging, atau transaction support. Direct
+                        method calls tidak menyimpan history of operations dan tidak dapat di-reverse atau di-replay.
+                        GUI buttons membutuhkan flexibility untuk trigger berbagai actions tanpa tight coupling.</p>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Solution</h2>
+                    <p>Encapsulate requests sebagai objects. Command interface mendefinisikan method untuk execute
+                        operation. Concrete commands mengimplementasikan interface ini dan menyimpan receiver serta
+                        parameters yang diperlukan. Invoker men-trigger commands tanpa tahu detail implementasinya.</p>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Implementation (C#)</h2>
+                    <pre><code class="language-csharp">// Command Interface
+public interface ICommand
+{
+    void Execute();
+    void Undo();
+}
+
+// Receiver - knows how to perform operations
+public class TextEditor
+{
+    private StringBuilder _text = new StringBuilder();
+
+    public void Insert(string text)
+    {
+        _text.Append(text);
+        Console.WriteLine($"Text: {_text}");
+    }
+
+    public void Delete(int length)
+    {
+        if (length <= _text.Length)
+        {
+            _text.Remove(_text.Length - length, length);
+            Console.WriteLine($"Text: {_text}");
+        }
+    }
+
+    public string GetText() => _text.ToString();
+}
+
+// Concrete Commands
+public class InsertCommand : ICommand
+{
+    private TextEditor _editor;
+    private string _text;
+
+    public InsertCommand(TextEditor editor, string text)
+    {
+        _editor = editor;
+        _text = text;
+    }
+
+    public void Execute()
+    {
+        _editor.Insert(_text);
+    }
+
+    public void Undo()
+    {
+        _editor.Delete(_text.Length);
+    }
+}
+
+public class DeleteCommand : ICommand
+{
+    private TextEditor _editor;
+    private int _length;
+    private string _deletedText;
+
+    public DeleteCommand(TextEditor editor, int length)
+    {
+        _editor = editor;
+        _length = length;
+    }
+
+    public void Execute()
+    {
+        string currentText = _editor.GetText();
+        _deletedText = currentText.Substring(currentText.Length - _length);
+        _editor.Delete(_length);
+    }
+
+    public void Undo()
+    {
+        _editor.Insert(_deletedText);
+    }
+}
+
+// Invoker - stores and executes commands
+public class CommandManager
+{
+    private Stack<ICommand> _history = new Stack<ICommand>();
+
+    public void ExecuteCommand(ICommand command)
+    {
+        command.Execute();
+        _history.Push(command);
+    }
+
+    public void Undo()
+    {
+        if (_history.Count > 0)
+        {
+            var command = _history.Pop();
+            command.Undo();
+        }
+    }
+}
+
+// Usage
+var editor = new TextEditor();
+var manager = new CommandManager();
+
+manager.ExecuteCommand(new InsertCommand(editor, "Hello "));
+manager.ExecuteCommand(new InsertCommand(editor, "World!"));
+manager.ExecuteCommand(new DeleteCommand(editor, 6)); // Remove "World!"
+
+manager.Undo(); // Restore "World!"
+manager.Undo(); // Remove "World!"
+manager.Undo(); // Remove "Hello "</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Implementation (Python)</h2>
+                    <pre><code class="language-python">from abc import ABC, abstractmethod
+from typing import List
+
+# Command Interface
+class ICommand(ABC):
+    @abstractmethod
+    def execute(self) -> None:
+        pass
+    
+    @abstractmethod
+    def undo(self) -> None:
+        pass
+
+# Receiver
+class TextEditor:
+    def __init__(self):
+        self._text = []
+    
+    def insert(self, text: str) -> None:
+        self._text.append(text)
+        print(f"Text: {''.join(self._text)}")
+    
+    def delete(self, length: int) -> None:
+        current = ''.join(self._text)
+        if length <= len(current):
+            self._text = list(current[:-length])
+            print(f"Text: {''.join(self._text)}")
+    
+    def get_text(self) -> str:
+        return ''.join(self._text)
+
+# Concrete Commands
+class InsertCommand(ICommand):
+    def __init__(self, editor: TextEditor, text: str):
+        self._editor = editor
+        self._text = text
+    
+    def execute(self) -> None:
+        self._editor.insert(self._text)
+    
+    def undo(self) -> None:
+        self._editor.delete(len(self._text))
+
+class DeleteCommand(ICommand):
+    def __init__(self, editor: TextEditor, length: int):
+        self._editor = editor
+        self._length = length
+        self._deleted_text = ""
+    
+    def execute(self) -> None:
+        current_text = self._editor.get_text()
+        self._deleted_text = current_text[-self._length:]
+        self._editor.delete(self._length)
+    
+    def undo(self) -> None:
+        self._editor.insert(self._deleted_text)
+
+# Invoker
+class CommandManager:
+    def __init__(self):
+        self._history: List[ICommand] = []
+    
+    def execute_command(self, command: ICommand) -> None:
+        command.execute()
+        self._history.append(command)
+    
+    def undo(self) -> None:
+        if self._history:
+            command = self._history.pop()
+            command.undo()
+
+# Usage
+editor = TextEditor()
+manager = CommandManager()
+
+manager.execute_command(InsertCommand(editor, "Hello "))
+manager.execute_command(InsertCommand(editor, "World!"))
+manager.execute_command(DeleteCommand(editor, 6))
+
+manager.undo()
+manager.undo()
+manager.undo()</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Real-World Examples</h2>
+                    <ul>
+                        <li><strong>Text Editors:</strong> Undo/Redo functionality untuk operations seperti insert,
+                            delete, format</li>
+                        <li><strong>Database Transactions:</strong> Commands untuk execute queries dengan rollback
+                            capability</li>
+                        <li><strong>Job Queues:</strong> Background tasks di-encapsulate sebagai commands dan di-queue
+                            untuk execution</li>
+                        <li><strong>GUI Actions:</strong> Button clicks, menu items, keyboard shortcuts trigger commands
+                        </li>
+                        <li><strong>Game Input:</strong> Player actions (move, attack, use item) sebagai replayable
+                            commands</li>
+                    </ul>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Pros and Cons</h2>
+                    <div class="pros-cons-grid">
+                        <div class="pros">
+                            <h3><i class="fas fa-check-circle"></i> Pros</h3>
+                            <ul>
+                                <li>Single Responsibility - decouples classes yang invoke operations dari classes yang
+                                    perform operations</li>
+                                <li>Open/Closed - dapat introduce new commands tanpa mengubah existing code</li>
+                                <li>Implement undo/redo dengan mudah</li>
+                                <li>Deferred execution of operations</li>
+                                <li>Assemble complex commands dari simple ones</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h3><i class="fas fa-times-circle"></i> Cons</h3>
+                            <ul>
+                                <li>Code menjadi lebih kompleks dengan extra layer antara senders dan receivers</li>
+                                <li>Banyak command classes untuk setiap operation</li>
+                                <li>Memory overhead untuk menyimpan command history</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="doc-navigation">
+                    <a href="template-method.html" class="nav-prev"><i class="fas fa-arrow-left"></i> Template
+                        Method</a>
+                    <a href="mediator.html" class="nav-next">Mediator <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </article>
+        </main>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                document.getElementById('sidebar').innerHTML = sidebarContent;
+                
+                // Re-run sidebar initialization from main.js
+                const event = new Event('sidebarLoaded');
+                document.dispatchEvent(event);
+            });
+    </script>
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                const sidebarElement = document.getElementById('sidebar');
+                
+                if (sidebarElement) {
+                    sidebarElement.innerHTML = sidebarContent;
+                    console.log('âœ… Sidebar loaded successfully');
+                    
+                    // Dispatch event after sidebar is loaded
+                    const event = new Event('sidebarLoaded');
+                    document.dispatchEvent(event);
+                } else {
+                    console.error('âŒ Sidebar element not found');
+                }
+            })
+            .catch(error => {
+                console.error('âŒ Error loading sidebar:', error);
+            });
+    </script>
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>

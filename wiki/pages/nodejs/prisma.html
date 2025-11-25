@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prisma ORM - Node.js Development</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div id="sidebarContainer"></div>
+
+    <div class="container">
+        <main class="content">
+            <div class="page-header">
+                <div class="breadcrumb">
+                    <a href="../../index.html">Home</a>
+                    <span>/</span>
+                    <a href="#">Node.js Development</a>
+                    <span>/</span>
+                    <span>Prisma ORM</span>
+                </div>
+                <h1><i class="fas fa-database"></i> Prisma - Next-Gen ORM for Node.js</h1>
+                <p class="page-description">Type-safe database access with auto-generated queries, migrations, and
+                    modern TypeScript support.</p>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-rocket"></i> Setup</h2>
+                <pre><code># Install Prisma CLI
+npm install -D prisma
+npm install @prisma/client
+
+# Initialize Prisma
+npx prisma init
+
+# This creates:
+# - prisma/schema.prisma
+# - .env file</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-file-code"></i> Schema Definition</h2>
+                <pre><code>// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  age       Int?
+  active    Boolean  @default(true)
+  profile   Profile?
+  posts     Post[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Profile {
+  id     Int    @id @default(autoincrement())
+  bio    String?
+  avatar String?
+  userId Int    @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String?
+  published Boolean  @default(false)
+  authorId  Int
+  author    User     @relation(fields: [authorId], references: [id])
+  tags      Tag[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Tag {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  posts Post[]
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-sync"></i> Migrations</h2>
+                <pre><code># Create migration
+npx prisma migrate dev --name init
+
+# Apply migrations to production
+npx prisma migrate deploy
+
+# Reset database
+npx prisma migrate reset
+
+# Generate Prisma Client
+npx prisma generate</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-code"></i> CRUD Operations</h2>
+                <pre><code>import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+// CREATE
+async function createUser() {
+    const user = await prisma.user.create({
+        data: {
+            email: 'john@example.com',
+            name: 'John Doe',
+            age: 30,
+            profile: {
+                create: {
+                    bio: 'Software Engineer',
+                    avatar: 'avatar.jpg'
+                }
+            }
+        },
+        include: {
+            profile: true
+        }
+    });
+    
+    return user;
+}
+
+// READ - Single
+async function getUserById(id: number) {
+    const user = await prisma.user.findUnique({
+        where: { id },
+        include: {
+            profile: true,
+            posts: true
+        }
+    });
+    
+    return user;
+}
+
+// READ - Multiple with filtering
+async function getActiveUsers() {
+    const users = await prisma.user.findMany({
+        where: {
+            active: true,
+            age: {
+                gte: 18,
+                lte: 65
+            }
+        },
+        orderBy: {
+            createdAt: 'desc'
+        },
+        take: 10,
+        skip: 0
+    });
+    
+    return users;
+}
+
+// UPDATE
+async function updateUser(id: number) {
+    const user = await prisma.user.update({
+        where: { id },
+        data: {
+            name: 'Jane Doe',
+            age: 31
+        }
+    });
+    
+    return user;
+}
+
+// DELETE
+async function deleteUser(id: number) {
+    const user = await prisma.user.delete({
+        where: { id }
+    });
+    
+    return user;
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-search"></i> Advanced Queries</h2>
+                <pre><code>// Complex filtering
+const users = await prisma.user.findMany({
+    where: {
+        AND: [
+            { active: true },
+            { age: { gte: 18 } },
+            {
+                OR: [
+                    { email: { endsWith: '@example.com' } },
+                    { name: { contains: 'John' } }
+                ]
+            }
+        ]
+    }
+});
+
+// Pagination
+async function getUsersPaginated(page = 1, pageSize = 10) {
+    const skip = (page - 1) * pageSize;
+    
+    const [users, total] = await Promise.all([
+        prisma.user.findMany({
+            skip,
+            take: pageSize,
+            orderBy: { createdAt: 'desc' }
+        }),
+        prisma.user.count()
+    ]);
+    
+    return {
+        data: users,
+        pagination: {
+            page,
+            pageSize,
+            total,
+            totalPages: Math.ceil(total / pageSize)
+        }
+    };
+}
+
+// Aggregations
+const stats = await prisma.user.aggregate({
+    _avg: { age: true },
+    _max: { age: true },
+    _min: { age: true },
+    _count: true
+});
+
+// Group by
+const usersByAge = await prisma.user.groupBy({
+    by: ['age'],
+    _count: {
+        id: true
+    },
+    orderBy: {
+        age: 'asc'
+    }
+});
+
+// Raw SQL
+const users = await prisma.$queryRaw`
+    SELECT * FROM "User" 
+    WHERE age > ${18} 
+    ORDER BY created_at DESC 
+    LIMIT 10
+`;</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-exchange-alt"></i> Transactions</h2>
+                <pre><code>// Sequential transactions
+async function transferMoney(fromId: number, toId: number, amount: number) {
+    const result = await prisma.$transaction(async (tx) => {
+        // Deduct from sender
+        const from = await tx.account.update({
+            where: { id: fromId },
+            data: { balance: { decrement: amount } }
+        });
+        
+        if (from.balance < 0) {
+            throw new Error('Insufficient balance');
+        }
+        
+        // Add to receiver
+        const to = await tx.account.update({
+            where: { id: toId },
+            data: { balance: { increment: amount } }
+        });
+        
+        // Create transaction record
+        const transaction = await tx.transaction.create({
+            data: {
+                fromId,
+                toId,
+                amount,
+                status: 'completed'
+            }
+        });
+        
+        return { from, to, transaction };
+    });
+    
+    return result;
+}
+
+// Interactive transactions
+const result = await prisma.$transaction([
+    prisma.user.create({ data: { email: 'user1@example.com', name: 'User 1' } }),
+    prisma.user.create({ data: { email: 'user2@example.com', name: 'User 2' } }),
+    prisma.post.create({ data: { title: 'Post 1', authorId: 1 } })
+]);</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-check-circle"></i> Best Practices</h2>
+                <div class="tip-box">
+                    <ul>
+                        <li>✅ Always use migrations for schema changes</li>
+                        <li>✅ Enable connection pooling for production</li>
+                        <li>✅ Use transactions for related operations</li>
+                        <li>✅ Index frequently queried fields</li>
+                        <li>✅ Use select to limit returned fields</li>
+                        <li>✅ Implement proper error handling</li>
+                        <li>✅ Close Prisma Client on app shutdown</li>
+                        <li>✅ Use environment variables for database URLs</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="navigation-links">
+                <a href="async-patterns.html" class="nav-link"><i class="fas fa-arrow-left"></i> Previous: Async
+                    Patterns</a>
+                <a href="testing.html" class="nav-link">Next: Jest & Testing <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebar = doc.querySelector('.sidebar');
+                if (sidebar) {
+                    document.getElementById('sidebarContainer').appendChild(sidebar);
+                    const event = new Event('sidebarLoaded');
+                    document.dispatchEvent(event);
+                }
+            });
+    </script>
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>

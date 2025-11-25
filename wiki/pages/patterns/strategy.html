@@ -1,0 +1,402 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strategy Pattern - Hanung's Dev Wiki</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-left">
+            <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+            <a href="../../index.html" class="logo"><i class="fas fa-code"></i><span>Hanung's Dev Wiki</span></a>
+        </div>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar" id="sidebar"></aside>
+        <main class="main-content">
+            <div class="breadcrumb">
+                <a href="../../index.html">Home</a><span>/</span>
+                <a href="#">Design Patterns</a><span>/</span>
+                <span>Strategy Pattern</span>
+            </div>
+
+            <article class="doc-article">
+                <h1>Strategy Pattern</h1>
+                <div class="doc-meta">
+                    <span class="badge badge-behavioral">Behavioral Pattern</span>
+                    <span class="doc-date"><i class="fas fa-calendar"></i> Updated: Nov 25, 2025</span>
+                </div>
+
+                <section class="doc-section">
+                    <h2>Overview</h2>
+                    <p>
+                        Strategy is a behavioral design pattern that lets you define a family of algorithms, put each of
+                        them
+                        into a separate class, and make their objects interchangeable. It enables selecting an
+                        algorithm's behavior
+                        at runtime instead of implementing a single algorithm directly.
+                    </p>
+                    <div class="info-box">
+                        <i class="fas fa-lightbulb"></i>
+                        <div>
+                            <strong>When to use:</strong> When you want to use different variants of an algorithm within
+                            an object
+                            and be able to switch from one algorithm to another during runtime. When you have a lot of
+                            similar classes
+                            that only differ in the way they execute some behavior.
+                        </div>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Problem</h2>
+                    <p>
+                        You're building a navigation app. Initially, it only builds routes for cars. Later, you add
+                        walking,
+                        cycling, and public transport options. Using if-else statements for each type creates messy code
+                        that's
+                        hard to maintain and test.
+                    </p>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Solution</h2>
+                    <p>
+                        Extract all different algorithms into separate classes called strategies. The original class
+                        (context)
+                        stores a reference to one of the strategies and delegates work to the strategy object instead of
+                        executing
+                        it directly.
+                    </p>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Implementation in C#</h2>
+
+                    <h3>Strategy Interface</h3>
+                    <pre><code class="language-csharp">// Strategy interface
+public interface IPaymentStrategy
+{
+    void Pay(decimal amount);
+}
+
+// Concrete Strategies
+public class CreditCardPayment : IPaymentStrategy
+{
+    private string _cardNumber;
+    private string _cvv;
+    
+    public CreditCardPayment(string cardNumber, string cvv)
+    {
+        _cardNumber = cardNumber;
+        _cvv = cvv;
+    }
+    
+    public void Pay(decimal amount)
+    {
+        Console.WriteLine($"Paid ${amount} using Credit Card ending in {_cardNumber.Substring(_cardNumber.Length - 4)}");
+    }
+}
+
+public class PayPalPayment : IPaymentStrategy
+{
+    private string _email;
+    
+    public PayPalPayment(string email)
+    {
+        _email = email;
+    }
+    
+    public void Pay(decimal amount)
+    {
+        Console.WriteLine($"Paid ${amount} using PayPal account {_email}");
+    }
+}
+
+public class BitcoinPayment : IPaymentStrategy
+{
+    private string _walletAddress;
+    
+    public BitcoinPayment(string walletAddress)
+    {
+        _walletAddress = walletAddress;
+    }
+    
+    public void Pay(decimal amount)
+    {
+        Console.WriteLine($"Paid ${amount} using Bitcoin to wallet {_walletAddress}");
+    }
+}</code></pre>
+
+                    <h3>Context</h3>
+                    <pre><code class="language-csharp">public class ShoppingCart
+{
+    private IPaymentStrategy _paymentStrategy;
+    private decimal _total;
+    
+    public void SetPaymentStrategy(IPaymentStrategy strategy)
+    {
+        _paymentStrategy = strategy;
+    }
+    
+    public void AddItem(decimal price)
+    {
+        _total += price;
+    }
+    
+    public void Checkout()
+    {
+        if (_paymentStrategy == null)
+        {
+            throw new InvalidOperationException("Payment strategy not set");
+        }
+        
+        _paymentStrategy.Pay(_total);
+        _total = 0;
+    }
+}
+
+// Usage
+var cart = new ShoppingCart();
+cart.AddItem(29.99m);
+cart.AddItem(49.99m);
+
+// Pay with credit card
+cart.SetPaymentStrategy(new CreditCardPayment("1234567812345678", "123"));
+cart.Checkout();
+
+// Or pay with PayPal
+cart.AddItem(99.99m);
+cart.SetPaymentStrategy(new PayPalPayment("user@example.com"));
+cart.Checkout();</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Implementation in Python</h2>
+
+                    <pre><code class="language-python">from abc import ABC, abstractmethod
+
+# Strategy interface
+class PaymentStrategy(ABC):
+    @abstractmethod
+    def pay(self, amount: float):
+        pass
+
+# Concrete Strategies
+class CreditCardPayment(PaymentStrategy):
+    def __init__(self, card_number: str, cvv: str):
+        self.card_number = card_number
+        self.cvv = cvv
+    
+    def pay(self, amount: float):
+        print(f"Paid ${amount} using Credit Card ending in {self.card_number[-4:]}")
+
+class PayPalPayment(PaymentStrategy):
+    def __init__(self, email: str):
+        self.email = email
+    
+    def pay(self, amount: float):
+        print(f"Paid ${amount} using PayPal account {self.email}")
+
+class BitcoinPayment(PaymentStrategy):
+    def __init__(self, wallet_address: str):
+        self.wallet_address = wallet_address
+    
+    def pay(self, amount: float):
+        print(f"Paid ${amount} using Bitcoin to wallet {self.wallet_address}")
+
+# Context
+class ShoppingCart:
+    def __init__(self):
+        self._payment_strategy = None
+        self._total = 0.0
+    
+    def set_payment_strategy(self, strategy: PaymentStrategy):
+        self._payment_strategy = strategy
+    
+    def add_item(self, price: float):
+        self._total += price
+    
+    def checkout(self):
+        if not self._payment_strategy:
+            raise ValueError("Payment strategy not set")
+        
+        self._payment_strategy.pay(self._total)
+        self._total = 0.0
+
+# Usage
+cart = ShoppingCart()
+cart.add_item(29.99)
+cart.add_item(49.99)
+
+cart.set_payment_strategy(CreditCardPayment("1234567812345678", "123"))
+cart.checkout()</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Real-World Example: Sorting Strategies</h2>
+                    <pre><code class="language-csharp">public interface ISortStrategy
+{
+    void Sort(List&lt;int&gt; list);
+}
+
+public class QuickSort : ISortStrategy
+{
+    public void Sort(List&lt;int&gt; list)
+    {
+        Console.WriteLine("Sorting using QuickSort");
+        list.Sort(); // Simplified
+    }
+}
+
+public class MergeSort : ISortStrategy
+{
+    public void Sort(List&lt;int&gt; list)
+    {
+        Console.WriteLine("Sorting using MergeSort");
+        // Merge sort implementation
+    }
+}
+
+public class BubbleSort : ISortStrategy
+{
+    public void Sort(List&lt;int&gt; list)
+    {
+        Console.WriteLine("Sorting using BubbleSort");
+        // Bubble sort implementation
+    }
+}
+
+public class Sorter
+{
+    private ISortStrategy _strategy;
+    
+    public void SetStrategy(ISortStrategy strategy)
+    {
+        _strategy = strategy;
+    }
+    
+    public void Sort(List&lt;int&gt; list)
+    {
+        _strategy.Sort(list);
+    }
+}
+
+// Usage - choose strategy based on data size
+var sorter = new Sorter();
+var data = new List&lt;int&gt; { 5, 2, 8, 1, 9 };
+
+if (data.Count < 10)
+    sorter.SetStrategy(new BubbleSort());
+else if (data.Count < 1000)
+    sorter.SetStrategy(new QuickSort());
+else
+    sorter.SetStrategy(new MergeSort());
+
+sorter.Sort(data);</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Pros and Cons</h2>
+                    <div class="pros-cons-grid">
+                        <div class="pros-box">
+                            <h3><i class="fas fa-check-circle"></i> Advantages</h3>
+                            <ul>
+                                <li>Swap algorithms at runtime</li>
+                                <li>Isolate implementation details from code that uses it</li>
+                                <li>Replace inheritance with composition</li>
+                                <li>Open/Closed Principle - introduce new strategies without changing context</li>
+                                <li>Makes unit testing easier</li>
+                            </ul>
+                        </div>
+                        <div class="cons-box">
+                            <h3><i class="fas fa-times-circle"></i> Disadvantages</h3>
+                            <ul>
+                                <li>Increases number of objects in application</li>
+                                <li>Clients must be aware of differences between strategies</li>
+                                <li>Overkill if you have only a couple of algorithms</li>
+                                <li>Modern languages with lambda/functional features might not need this pattern</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Strategy vs State Pattern</h2>
+                    <ul>
+                        <li><strong>Strategy:</strong> Often set once by client; focuses on different ways to do the
+                            same thing</li>
+                        <li><strong>State:</strong> Changes automatically during object lifetime; represents different
+                            states</li>
+                        <li><strong>Strategy:</strong> Strategies are independent and unaware of each other</li>
+                        <li><strong>State:</strong> States may know about each other and trigger transitions</li>
+                    </ul>
+                </section>
+
+                <div class="doc-navigation">
+                    <a href="decorator.html" class="nav-prev"><i
+                            class="fas fa-arrow-left"></i><span>Decorator</span></a>
+                    <a href="adapter.html" class="nav-next"><span>Adapter</span><i class="fas fa-arrow-right"></i></a>
+                </div>
+            </article>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                document.getElementById('sidebar').innerHTML = sidebarContent;
+                
+                // Re-run sidebar initialization from main.js
+                const event = new Event('sidebarLoaded');
+                document.dispatchEvent(event);
+            });
+    </script>
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                const sidebarElement = document.getElementById('sidebar');
+                
+                if (sidebarElement) {
+                    sidebarElement.innerHTML = sidebarContent;
+                    console.log('âœ… Sidebar loaded successfully');
+                    
+                    // Dispatch event after sidebar is loaded
+                    const event = new Event('sidebarLoaded');
+                    document.dispatchEvent(event);
+                } else {
+                    console.error('âŒ Sidebar element not found');
+                }
+            })
+            .catch(error => {
+                console.error('âŒ Error loading sidebar:', error);
+            });
+    </script>
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>

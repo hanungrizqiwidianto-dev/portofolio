@@ -1,0 +1,376 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Singleton Pattern - Hanung's Dev Wiki</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-left">
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <a href="../../index.html" class="logo">
+                <i class="fas fa-code"></i>
+                <span>Hanung's Dev Wiki</span>
+            </a>
+        </div>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar" id="sidebar"></aside>
+
+        <main class="main-content">
+            <div class="breadcrumb">
+                <a href="../../index.html">Home</a>
+                <span>/</span>
+                <a href="#">Design Patterns</a>
+                <span>/</span>
+                <span>Singleton Pattern</span>
+            </div>
+
+            <article class="doc-article">
+                <h1>Singleton Pattern</h1>
+                <div class="doc-meta">
+                    <span class="badge badge-creational">Creational Pattern</span>
+                    <span class="doc-date"><i class="fas fa-calendar"></i> Updated: Nov 25, 2025</span>
+                </div>
+
+                <section class="doc-section">
+                    <h2>Overview</h2>
+                    <p>
+                        Singleton is a creational design pattern that ensures a class has only one instance and provides
+                        a global point
+                        of access to that instance. This pattern is useful when exactly one object is needed to
+                        coordinate actions across the system.
+                    </p>
+                    <div class="info-box">
+                        <i class="fas fa-lightbulb"></i>
+                        <div>
+                            <strong>When to use:</strong> When you need to ensure that only one instance of a class
+                            exists and you need
+                            a global access point to that instance. Common uses include logging, database connections,
+                            configuration managers.
+                        </div>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Problem</h2>
+                    <p>
+                        Sometimes you need to ensure that a class has just a single instance. For example, you want to
+                        have a single database
+                        connection shared by all objects, or a single configuration object for the entire application.
+                    </p>
+                    <p>
+                        A regular constructor can't enforce this because a constructor call must always return a new
+                        object by design.
+                    </p>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Solution</h2>
+                    <p>
+                        All implementations of the Singleton pattern have these two steps in common:
+                    </p>
+                    <ul>
+                        <li>Make the default constructor private to prevent other objects from using the
+                            <code>new</code> operator</li>
+                        <li>Create a static creation method that acts as a constructor and returns the single instance
+                        </li>
+                    </ul>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Implementation in C#</h2>
+
+                    <h3>Thread-Safe Singleton (Recommended)</h3>
+                    <pre><code class="language-csharp">public sealed class Singleton
+{
+    private static readonly Lazy&lt;Singleton&gt; _instance = 
+        new Lazy&lt;Singleton&gt;(() => new Singleton());
+
+    private Singleton()
+    {
+        // Private constructor prevents instantiation
+        Console.WriteLine("Singleton instance created");
+    }
+
+    public static Singleton Instance => _instance.Value;
+
+    public void DoSomething()
+    {
+        Console.WriteLine("Singleton method called");
+    }
+}
+
+// Usage
+var instance1 = Singleton.Instance;
+var instance2 = Singleton.Instance;
+
+Console.WriteLine(ReferenceEquals(instance1, instance2)); // True</code></pre>
+
+                    <h3>Double-Check Locking (Alternative)</h3>
+                    <pre><code class="language-csharp">public sealed class Singleton
+{
+    private static Singleton _instance;
+    private static readonly object _lock = new object();
+
+    private Singleton() { }
+
+    public static Singleton Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                lock (_lock)
+                {
+                    if (_instance == null)
+                    {
+                        _instance = new Singleton();
+                    }
+                }
+            }
+            return _instance;
+        }
+    }
+}</code></pre>
+
+                    <h3>Static Initialization</h3>
+                    <pre><code class="language-csharp">public sealed class Singleton
+{
+    private static readonly Singleton _instance = new Singleton();
+    
+    // Static constructor ensures thread safety
+    static Singleton() { }
+    
+    private Singleton() { }
+    
+    public static Singleton Instance => _instance;
+}</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Implementation in Python</h2>
+
+                    <h3>Using Metaclass</h3>
+                    <pre><code class="language-python">class SingletonMeta(type):
+    _instances = {}
+    
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            instance = super().__call__(*args, **kwargs)
+            cls._instances[cls] = instance
+        return cls._instances[cls]
+
+class Singleton(metaclass=SingletonMeta):
+    def __init__(self):
+        print("Singleton instance created")
+    
+    def do_something(self):
+        print("Singleton method called")
+
+# Usage
+instance1 = Singleton()
+instance2 = Singleton()
+
+print(instance1 is instance2)  # True</code></pre>
+
+                    <h3>Using Decorator</h3>
+                    <pre><code class="language-python">def singleton(cls):
+    instances = {}
+    
+    def get_instance(*args, **kwargs):
+        if cls not in instances:
+            instances[cls] = cls(*args, **kwargs)
+        return instances[cls]
+    
+    return get_instance
+
+@singleton
+class DatabaseConnection:
+    def __init__(self):
+        self.connection = "Connected to database"
+    
+    def query(self, sql):
+        return f"Executing: {sql}"
+
+# Usage
+db1 = DatabaseConnection()
+db2 = DatabaseConnection()
+print(db1 is db2)  # True</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Real-World Example: Configuration Manager</h2>
+
+                    <pre><code class="language-csharp">public sealed class ConfigurationManager
+{
+    private static readonly Lazy&lt;ConfigurationManager&gt; _instance = 
+        new Lazy&lt;ConfigurationManager&gt;(() => new ConfigurationManager());
+
+    private readonly Dictionary&lt;string, string&gt; _settings;
+
+    private ConfigurationManager()
+    {
+        // Load configuration from file
+        _settings = new Dictionary&lt;string, string>
+        {
+            { "DatabaseConnection", "Server=localhost;Database=mydb" },
+            { "ApiKey", "your-api-key" },
+            { "MaxRetries", "3" }
+        };
+    }
+
+    public static ConfigurationManager Instance => _instance.Value;
+
+    public string GetSetting(string key)
+    {
+        return _settings.TryGetValue(key, out var value) ? value : null;
+    }
+
+    public void SetSetting(string key, string value)
+    {
+        _settings[key] = value;
+    }
+}
+
+// Usage
+var config = ConfigurationManager.Instance;
+string dbConnection = config.GetSetting("DatabaseConnection");
+Console.WriteLine(dbConnection);</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Pros and Cons</h2>
+
+                    <div class="pros-cons-grid">
+                        <div class="pros-box">
+                            <h3><i class="fas fa-check-circle"></i> Advantages</h3>
+                            <ul>
+                                <li>You can be sure that a class has only a single instance</li>
+                                <li>You gain a global access point to that instance</li>
+                                <li>The singleton object is initialized only when it's requested for the first time
+                                    (lazy initialization)</li>
+                                <li>Reduces memory footprint by preventing multiple instances</li>
+                            </ul>
+                        </div>
+                        <div class="cons-box">
+                            <h3><i class="fas fa-times-circle"></i> Disadvantages</h3>
+                            <ul>
+                                <li>Violates the Single Responsibility Principle (controls both creation and behavior)
+                                </li>
+                                <li>Can mask bad design (components knowing too much about each other)</li>
+                                <li>Difficult to unit test (hard to mock)</li>
+                                <li>Requires special treatment in multithreaded environments</li>
+                                <li>Can be considered an anti-pattern in modern development</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Common Use Cases</h2>
+                    <ul>
+                        <li><strong>Logger:</strong> Single logging instance across the application</li>
+                        <li><strong>Configuration Manager:</strong> Centralized application settings</li>
+                        <li><strong>Database Connection Pool:</strong> Manage database connections</li>
+                        <li><strong>Cache Manager:</strong> Application-wide caching</li>
+                        <li><strong>Thread Pool:</strong> Manage worker threads</li>
+                    </ul>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Alternatives to Consider</h2>
+                    <p>
+                        Modern development practices often favor dependency injection over Singleton pattern:
+                    </p>
+                    <pre><code class="language-csharp">// Instead of Singleton, use DI container
+services.AddSingleton&lt;IConfigurationManager, ConfigurationManager&gt;();
+
+// Then inject where needed
+public class MyService
+{
+    private readonly IConfigurationManager _config;
+    
+    public MyService(IConfigurationManager config)
+    {
+        _config = config;
+    }
+}</code></pre>
+                </section>
+
+                <div class="doc-navigation">
+                    <a href="builder.html" class="nav-prev">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Builder</span>
+                    </a>
+                    <a href="factory-method.html" class="nav-next">
+                        <span>Factory Method</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </article>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                document.getElementById('sidebar').innerHTML = sidebarContent;
+                
+                // Re-run sidebar initialization from main.js
+                const event = new Event('sidebarLoaded');
+                document.dispatchEvent(event);
+            });
+    </script>
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                const sidebarElement = document.getElementById('sidebar');
+                
+                if (sidebarElement) {
+                    sidebarElement.innerHTML = sidebarContent;
+                    console.log('âœ… Sidebar loaded successfully');
+                    
+                    // Dispatch event after sidebar is loaded
+                    const event = new Event('sidebarLoaded');
+                    document.dispatchEvent(event);
+                } else {
+                    console.error('âŒ Sidebar element not found');
+                }
+            })
+            .catch(error => {
+                console.error('âŒ Error loading sidebar:', error);
+            });
+    </script>
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>

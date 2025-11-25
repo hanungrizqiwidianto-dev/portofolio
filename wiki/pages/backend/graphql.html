@@ -1,0 +1,190 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GraphQL - Hanung's Dev Wiki</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-left">
+            <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+            <a href="../../index.html" class="logo"><i class="fas fa-code"></i><span>Hanung's Dev Wiki</span></a>
+        </div>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar" id="sidebar"></aside>
+        <main class="main-content">
+            <div class="breadcrumb">
+                <a href="../../index.html">Home</a><span>/</span>
+                <a href="#">Backend Development</a><span>/</span>
+                <span>GraphQL</span>
+            </div>
+
+            <article class="doc-article">
+                <h1>GraphQL</h1>
+                <div class="doc-meta">
+                    <span class="badge badge-backend">Backend Development</span>
+                    <span class="doc-date"><i class="fas fa-calendar"></i> Updated: Nov 25, 2025</span>
+                </div>
+
+                <section class="doc-section">
+                    <h2>What is GraphQL?</h2>
+                    <p>
+                        GraphQL is a query language for APIs and a runtime for executing those queries with your
+                        existing data.
+                        Developed by Facebook, it provides a complete and understandable description of the data in your
+                        API.
+                    </p>
+                </section>
+
+                <section class="doc-section">
+                    <h2>GraphQL vs REST</h2>
+                    <table class="doc-table">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>REST</th>
+                                <th>GraphQL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Data Fetching</td>
+                                <td>Multiple endpoints</td>
+                                <td>Single endpoint</td>
+                            </tr>
+                            <tr>
+                                <td>Over/Under Fetching</td>
+                                <td>Common issue</td>
+                                <td>Get exactly what you need</td>
+                            </tr>
+                            <tr>
+                                <td>Versioning</td>
+                                <td>Usually required</td>
+                                <td>Not needed</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section class="doc-section">
+                    <h2>HotChocolate (.NET) Example</h2>
+                    <pre><code class="language-csharp">// Install: dotnet add package HotChocolate.AspNetCore
+
+// Model
+public class User
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string Email { get; set; }
+}
+
+// Query Type
+public class Query
+{
+    public User GetUser(int id, [Service] IUserRepository repository)
+    {
+        return repository.GetUserById(id);
+    }
+    
+    public IEnumerable&lt;User&gt; GetUsers([Service] IUserRepository repository)
+    {
+        return repository.GetAllUsers();
+    }
+}
+
+// Program.cs
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services
+    .AddGraphQLServer()
+    .AddQueryType&lt;Query&gt;();
+
+var app = builder.Build();
+app.MapGraphQL();
+app.Run();</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>GraphQL Query Examples</h2>
+                    <pre><code class="language-graphql"># Get specific fields
+{
+  user(id: 1) {
+    name
+    email
+  }
+}
+
+# With aliases and fragments
+{
+  firstUser: user(id: 1) {
+    ...userFields
+  }
+  secondUser: user(id: 2) {
+    ...userFields
+  }
+}
+
+fragment userFields on User {
+  id
+  name
+  email
+}</code></pre>
+                </section>
+            </article>
+        </main>
+    </div>
+
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                document.getElementById('sidebar').innerHTML = sidebarContent;
+                
+                // Re-run sidebar initialization from main.js
+                const event = new Event('sidebarLoaded');
+                document.dispatchEvent(event);
+            });
+    </script>
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                const sidebarElement = document.getElementById('sidebar');
+                
+                if (sidebarElement) {
+                    sidebarElement.innerHTML = sidebarContent;
+                    console.log('âœ… Sidebar loaded successfully');
+                    
+                    // Dispatch event after sidebar is loaded
+                    const event = new Event('sidebarLoaded');
+                    document.dispatchEvent(event);
+                } else {
+                    console.error('âŒ Sidebar element not found');
+                }
+            })
+            .catch(error => {
+                console.error('âŒ Error loading sidebar:', error);
+            });
+    </script>
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,209 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saga Pattern - Hanung's Dev Wiki</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+            <a href="../../index.html" class="logo"><i class="fas fa-code"></i><span>Hanung's Dev Wiki</span></a>
+        </div>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar" id="sidebar"></aside>
+        <main class="main-content">
+            <div class="breadcrumb">
+                <a href="../../index.html">Home</a><span>/</span>
+                <a href="#">Microservices</a><span>/</span>
+                <span>Saga Pattern</span>
+            </div>
+
+            <article class="doc-article">
+                <h1>Saga Pattern</h1>
+                <div class="doc-meta">
+                    <span class="badge badge-microservices">Microservices</span>
+                    <span class="doc-date"><i class="fas fa-calendar"></i> Updated: Nov 25, 2025</span>
+                </div>
+
+                <section class="doc-section">
+                    <h2>Overview</h2>
+                    <p>Saga Pattern manages distributed transactions across microservices using a sequence of local transactions. Each step publishes events or commands, with compensating transactions for rollback.</p>
+                    <div class="info-box">
+                        <i class="fas fa-lightbulb"></i>
+                        <div>
+                            <strong>Why It Matters:</strong> Understanding Saga Pattern is essential for building robust, scalable, and secure modern applications.
+                        </div>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Key Concepts</h2>
+                    <div class="checklist">
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Choreography - Event-driven coordination</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Orchestration - Central coordinator</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Compensating Transactions - Undo operations</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Saga State Management - Track progress</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Event Sourcing - Store all events</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Idempotency - Handle duplicate requests</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Timeout Handling - Manage failures</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Saga Execution Coordinator - Control flow</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Common Use Cases</h2>
+                    <div class="example-box">
+                        <h4>Where to Apply Saga Pattern</h4>
+                        <ul>
+                            <li>E-commerce order processing</li>
+                            <li>Travel booking systems</li>
+                            <li>Financial transactions</li>
+                            <li>Multi-step workflows</li>
+                            <li>Distributed business processes</li>
+                            <li>Cross-service data consistency</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Best Practices</h2>
+                    <div class="checklist">
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Design idempotent operations</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Implement compensating transactions carefully</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Use orchestration for complex sagas</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Monitor saga execution</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Log all saga events</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Handle timeouts properly</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Test failure scenarios extensively</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Implementation Guide</h2>
+                    <p>
+                        Detailed implementation examples, code snippets, and step-by-step tutorials for Saga Pattern 
+                        will be enhanced in future updates. For now, refer to official documentation and community resources.
+                    </p>
+                    <div class="example-box">
+                        <h4>ðŸ“š Recommended Resources</h4>
+                        <ul>
+                            <li>Official documentation and API references</li>
+                            <li>Industry best practices and design patterns</li>
+                            <li>Real-world case studies and examples</li>
+                            <li>Community tutorials and blog posts</li>
+                            <li>Video courses and interactive learning platforms</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Further Reading</h2>
+                    <ul>
+                        <li>Browse related topics in the sidebar navigation</li>
+                        <li>Check official documentation for your tech stack</li>
+                        <li>Join community forums and discussions</li>
+                        <li>Follow industry blogs and newsletters</li>
+                        <li>Practice with hands-on projects and tutorials</li>
+                    </ul>
+                </section>
+                        </article>
+        </main>
+    </div>
+
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                document.getElementById('sidebar').innerHTML = sidebarContent;
+                
+                // Re-run sidebar initialization from main.js
+                const event = new Event('sidebarLoaded');
+                document.dispatchEvent(event);
+            });
+    </script>
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                const sidebarElement = document.getElementById('sidebar');
+                
+                if (sidebarElement) {
+                    sidebarElement.innerHTML = sidebarContent;
+                    console.log('âœ… Sidebar loaded successfully');
+                    
+                    // Dispatch event after sidebar is loaded
+                    const event = new Event('sidebarLoaded');
+                    document.dispatchEvent(event);
+                } else {
+                    console.error('âŒ Sidebar element not found');
+                }
+            })
+            .catch(error => {
+                console.error('âŒ Error loading sidebar:', error);
+            });
+    </script>
+    <script src="../../js/main.js"></script>
+</body>
+</html>

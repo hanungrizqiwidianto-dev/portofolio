@@ -1,0 +1,322 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adapter Pattern - Developer Wiki</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+
+<body>
+    <div class="wiki-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-book"></i> Wiki</h2>
+                <button class="close-sidebar" id="closeSidebar"><i class="fas fa-times"></i></button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="../../index.html"><i class="fas fa-home"></i> Home</a>
+                <a href="../getting-started.html"><i class="fas fa-rocket"></i> Getting Started</a>
+
+                <div class="sidebar-section">
+                    <h3 class="section-header"><i class="fas fa-shapes"></i> Design Patterns</h3>
+                    <div class="sidebar-submenu">
+                        <div class="submenu-category">
+                            <h4>Creational</h4>
+                            <a href="builder.html">Builder</a>
+                            <a href="factory-method.html">Factory Method</a>
+                            <a href="singleton.html">Singleton</a>
+                            <a href="abstract-factory.html">Abstract Factory</a>
+                        </div>
+                        <div class="submenu-category">
+                            <h4>Structural</h4>
+                            <a href="adapter.html" class="active">Adapter</a>
+                            <a href="bridge.html">Bridge</a>
+                            <a href="decorator.html">Decorator</a>
+                            <a href="facade.html">Facade</a>
+                        </div>
+                        <div class="submenu-category">
+                            <h4>Behavioral</h4>
+                            <a href="strategy.html">Strategy</a>
+                            <a href="template-method.html">Template Method</a>
+                            <a href="command.html">Command</a>
+                            <a href="mediator.html">Mediator</a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <button class="toggle-sidebar" id="toggleSidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <article class="doc-article">
+                <div class="breadcrumb">
+                    <a href="../../index.html">Home</a> / <a href="../../index.html#patterns">Design Patterns</a> /
+                    Adapter
+                </div>
+
+                <h1>Adapter Pattern</h1>
+                <div class="doc-meta">
+                    <span class="badge badge-structural">Structural</span>
+                    <span class="badge badge-beginner">Beginner</span>
+                </div>
+
+                <section class="doc-section">
+                    <h2>Overview</h2>
+                    <p>Adapter pattern memungkinkan objek dengan interface yang tidak kompatibel untuk bekerja sama.
+                        Pattern ini bertindak sebagai wrapper yang menerjemahkan satu interface ke interface lain yang
+                        diharapkan oleh client.</p>
+
+                    <div class="info-box">
+                        <strong>Analogi:</strong> Seperti adaptor colokan listrik yang memungkinkan Anda menggunakan
+                        perangkat elektronik dari negara lain. Adaptor mengubah format colokan agar kompatibel dengan
+                        stop kontak lokal.
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Problem</h2>
+                    <p>Anda perlu menggunakan library atau class pihak ketiga, tetapi interface-nya tidak kompatibel
+                        dengan kode yang sudah ada. Mengubah kode existing atau library pihak ketiga sangat berisiko dan
+                        tidak praktis.</p>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Solution</h2>
+                    <p>Buat adapter class yang mengimplementasikan interface yang diharapkan oleh client, dan secara
+                        internal menggunakan instance dari class yang ingin diadaptasi (adaptee). Adapter menerjemahkan
+                        panggilan dari client ke format yang dipahami adaptee.</p>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Implementation (C#)</h2>
+                    <pre><code class="language-csharp">// Target Interface - yang diharapkan client
+public interface IPaymentProcessor
+{
+    void ProcessPayment(decimal amount);
+    bool RefundPayment(string transactionId);
+}
+
+// Adaptee - Third-party payment library (incompatible interface)
+public class StripePaymentGateway
+{
+    public void MakeStripePayment(double amountInCents)
+    {
+        Console.WriteLine($"Processing Stripe payment: ${amountInCents / 100}");
+    }
+
+    public bool CreateStripeRefund(string chargeId)
+    {
+        Console.WriteLine($"Refunding Stripe charge: {chargeId}");
+        return true;
+    }
+}
+
+// Adapter - Makes StripePaymentGateway compatible with IPaymentProcessor
+public class StripeAdapter : IPaymentProcessor
+{
+    private readonly StripePaymentGateway _stripeGateway;
+
+    public StripeAdapter(StripePaymentGateway stripeGateway)
+    {
+        _stripeGateway = stripeGateway;
+    }
+
+    public void ProcessPayment(decimal amount)
+    {
+        // Convert dollars to cents for Stripe API
+        double amountInCents = (double)(amount * 100);
+        _stripeGateway.MakeStripePayment(amountInCents);
+    }
+
+    public bool RefundPayment(string transactionId)
+    {
+        return _stripeGateway.CreateStripeRefund(transactionId);
+    }
+}
+
+// Client Code
+public class EcommerceService
+{
+    private readonly IPaymentProcessor _paymentProcessor;
+
+    public EcommerceService(IPaymentProcessor paymentProcessor)
+    {
+        _paymentProcessor = paymentProcessor;
+    }
+
+    public void Checkout(decimal totalAmount)
+    {
+        _paymentProcessor.ProcessPayment(totalAmount);
+    }
+}
+
+// Usage
+var stripeGateway = new StripePaymentGateway();
+var adapter = new StripeAdapter(stripeGateway);
+var service = new EcommerceService(adapter);
+service.Checkout(99.99m); // Processing Stripe payment: $99.99</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Implementation (Python)</h2>
+                    <pre><code class="language-python">from abc import ABC, abstractmethod
+
+# Target Interface
+class IPaymentProcessor(ABC):
+    @abstractmethod
+    def process_payment(self, amount: float) -> None:
+        pass
+    
+    @abstractmethod
+    def refund_payment(self, transaction_id: str) -> bool:
+        pass
+
+# Adaptee - Third-party library
+class StripePaymentGateway:
+    def make_stripe_payment(self, amount_in_cents: float) -> None:
+        print(f"Processing Stripe payment: ${amount_in_cents / 100}")
+    
+    def create_stripe_refund(self, charge_id: str) -> bool:
+        print(f"Refunding Stripe charge: {charge_id}")
+        return True
+
+# Adapter
+class StripeAdapter(IPaymentProcessor):
+    def __init__(self, stripe_gateway: StripePaymentGateway):
+        self._stripe_gateway = stripe_gateway
+    
+    def process_payment(self, amount: float) -> None:
+        amount_in_cents = amount * 100
+        self._stripe_gateway.make_stripe_payment(amount_in_cents)
+    
+    def refund_payment(self, transaction_id: str) -> bool:
+        return self._stripe_gateway.create_stripe_refund(transaction_id)
+
+# Client
+class EcommerceService:
+    def __init__(self, payment_processor: IPaymentProcessor):
+        self._payment_processor = payment_processor
+    
+    def checkout(self, total_amount: float) -> None:
+        self._payment_processor.process_payment(total_amount)
+
+# Usage
+stripe_gateway = StripePaymentGateway()
+adapter = StripeAdapter(stripe_gateway)
+service = EcommerceService(adapter)
+service.checkout(99.99)  # Processing Stripe payment: $99.99</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Real-World Examples</h2>
+                    <ul>
+                        <li><strong>Payment Gateway Integration:</strong> Adapter untuk berbagai payment providers
+                            (Stripe, PayPal, Square) agar memiliki interface yang seragam</li>
+                        <li><strong>Database Adapters:</strong> ADO.NET menggunakan adapter pattern untuk berbagai
+                            database (SqlAdapter, OracleAdapter, MySqlAdapter)</li>
+                        <li><strong>Logging Frameworks:</strong> Adapter untuk menggabungkan berbagai logging libraries
+                            (NLog, Log4Net, Serilog) dengan interface yang konsisten</li>
+                        <li><strong>XML to JSON Converter:</strong> Adapter yang mengubah XML parser API menjadi JSON
+                            parser API</li>
+                    </ul>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Pros and Cons</h2>
+                    <div class="pros-cons-grid">
+                        <div class="pros">
+                            <h3><i class="fas fa-check-circle"></i> Pros</h3>
+                            <ul>
+                                <li>Memisahkan interface conversion logic dari business logic (Single Responsibility)
+                                </li>
+                                <li>Mudah menambahkan adapter baru tanpa mengubah client code (Open/Closed)</li>
+                                <li>Memungkinkan integrasi dengan library pihak ketiga tanpa modifikasi</li>
+                                <li>Meningkatkan reusability dari class yang sudah ada</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h3><i class="fas fa-times-circle"></i> Cons</h3>
+                            <ul>
+                                <li>Meningkatkan overall complexity dengan menambahkan classes dan interfaces baru</li>
+                                <li>Performance overhead karena extra layer of indirection</li>
+                                <li>Terkadang lebih mudah mengubah service class langsung daripada membuat adapter</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>When to Use</h2>
+                    <ul>
+                        <li>Ketika ingin menggunakan existing class, tetapi interface-nya tidak kompatibel</li>
+                        <li>Ketika ingin membuat reusable class yang bekerja dengan unrelated or unforeseen classes</li>
+                        <li>Ketika perlu menggunakan beberapa existing subclasses, tetapi tidak praktis untuk meng-adapt
+                            interface mereka dengan subclassing</li>
+                    </ul>
+                </section>
+
+                <div class="doc-navigation">
+                    <a href="abstract-factory.html" class="nav-prev"><i class="fas fa-arrow-left"></i> Abstract
+                        Factory</a>
+                    <a href="bridge.html" class="nav-next">Bridge <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </article>
+        </main>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                document.getElementById('sidebar').innerHTML = sidebarContent;
+                
+                // Re-run sidebar initialization from main.js
+                const event = new Event('sidebarLoaded');
+                document.dispatchEvent(event);
+            });
+    </script>
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                const sidebarElement = document.getElementById('sidebar');
+                
+                if (sidebarElement) {
+                    sidebarElement.innerHTML = sidebarContent;
+                    console.log('âœ… Sidebar loaded successfully');
+                    
+                    // Dispatch event after sidebar is loaded
+                    const event = new Event('sidebarLoaded');
+                    document.dispatchEvent(event);
+                } else {
+                    console.error('âŒ Sidebar element not found');
+                }
+            })
+            .catch(error => {
+                console.error('âŒ Error loading sidebar:', error);
+            });
+    </script>
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>

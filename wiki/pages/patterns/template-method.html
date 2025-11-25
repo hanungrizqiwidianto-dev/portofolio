@@ -1,0 +1,379 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Template Method Pattern - Developer Wiki</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+
+<body>
+    <div class="wiki-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-book"></i> Wiki</h2>
+                <button class="close-sidebar" id="closeSidebar"><i class="fas fa-times"></i></button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="../../index.html"><i class="fas fa-home"></i> Home</a>
+                <a href="../getting-started.html"><i class="fas fa-rocket"></i> Getting Started</a>
+
+                <div class="sidebar-section">
+                    <h3 class="section-header"><i class="fas fa-shapes"></i> Design Patterns</h3>
+                    <div class="sidebar-submenu">
+                        <div class="submenu-category">
+                            <h4>Creational</h4>
+                            <a href="builder.html">Builder</a>
+                            <a href="factory-method.html">Factory Method</a>
+                            <a href="singleton.html">Singleton</a>
+                            <a href="abstract-factory.html">Abstract Factory</a>
+                        </div>
+                        <div class="submenu-category">
+                            <h4>Structural</h4>
+                            <a href="adapter.html">Adapter</a>
+                            <a href="bridge.html">Bridge</a>
+                            <a href="decorator.html">Decorator</a>
+                            <a href="facade.html">Facade</a>
+                        </div>
+                        <div class="submenu-category">
+                            <h4>Behavioral</h4>
+                            <a href="strategy.html">Strategy</a>
+                            <a href="template-method.html" class="active">Template Method</a>
+                            <a href="command.html">Command</a>
+                            <a href="mediator.html">Mediator</a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <button class="toggle-sidebar" id="toggleSidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <article class="doc-article">
+                <div class="breadcrumb">
+                    <a href="../../index.html">Home</a> / <a href="../../index.html#patterns">Design Patterns</a> /
+                    Template Method
+                </div>
+
+                <h1>Template Method Pattern</h1>
+                <div class="doc-meta">
+                    <span class="badge badge-behavioral">Behavioral</span>
+                    <span class="badge badge-beginner">Beginner</span>
+                </div>
+
+                <section class="doc-section">
+                    <h2>Overview</h2>
+                    <p>Template Method pattern mendefinisikan skeleton dari algorithm dalam base class, tetapi
+                        membiarkan subclasses mengoverride steps tertentu tanpa mengubah struktur algorithm tersebut.
+                        Pattern ini menggunakan inheritance untuk vary parts dari algorithm.</p>
+
+                    <div class="info-box">
+                        <strong>Analogi:</strong> Seperti resep masakan template. Resep menentukan urutan langkah
+                        (panaskan, tambahkan bahan, masak, sajikan), tetapi setiap chef dapat mengimplementasikan detail
+                        spesifik dari setiap langkah dengan cara mereka sendiri.
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Problem</h2>
+                    <p>Anda memiliki beberapa classes dengan algoritma yang mirip tetapi berbeda dalam detail
+                        implementasinya. Code duplication terjadi karena struktur algorithm yang sama diulang di
+                        berbagai tempat dengan small variations.</p>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Solution</h2>
+                    <p>Buat abstract base class yang mendefinisikan template method (sequence of steps). Beberapa steps
+                        diimplementasikan di base class, sementara yang lain dideklarasikan sebagai abstract methods
+                        yang harus diimplementasikan oleh subclasses.</p>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Implementation (C#)</h2>
+                    <pre><code class="language-csharp">// Abstract Class - Template Method
+public abstract class DataMiner
+{
+    // Template Method - defines algorithm skeleton
+    public void Mine(string path)
+    {
+        var file = OpenFile(path);
+        var data = ExtractData(file);
+        var parsed = ParseData(data);
+        var analyzed = AnalyzeData(parsed);
+        SendReport(analyzed);
+        CloseFile(file);
+    }
+
+    // Common steps with default implementation
+    protected virtual void OpenFile(string path)
+    {
+        Console.WriteLine($"Opening file: {path}");
+    }
+
+    protected virtual void CloseFile(object file)
+    {
+        Console.WriteLine("Closing file");
+    }
+
+    // Abstract steps - must be implemented by subclasses
+    protected abstract object ExtractData(object file);
+    protected abstract object ParseData(object data);
+    protected abstract object AnalyzeData(object data);
+
+    // Hook - optional override point
+    protected virtual void SendReport(object data)
+    {
+        Console.WriteLine("Sending report via default channel");
+    }
+}
+
+// Concrete Class - CSV Data Miner
+public class CsvDataMiner : DataMiner
+{
+    protected override object ExtractData(object file)
+    {
+        Console.WriteLine("Extracting CSV data");
+        return new { Type = "CSV", Rows = 1000 };
+    }
+
+    protected override object ParseData(object data)
+    {
+        Console.WriteLine("Parsing CSV data");
+        return new { ParsedRows = 950 };
+    }
+
+    protected override object AnalyzeData(object data)
+    {
+        Console.WriteLine("Analyzing CSV data");
+        return new { Insights = "Sales increased 20%" };
+    }
+
+    protected override void SendReport(object data)
+    {
+        Console.WriteLine($"Sending CSV report via Email: {data}");
+    }
+}
+
+// Concrete Class - JSON Data Miner
+public class JsonDataMiner : DataMiner
+{
+    protected override object ExtractData(object file)
+    {
+        Console.WriteLine("Extracting JSON data");
+        return new { Type = "JSON", Records = 500 };
+    }
+
+    protected override object ParseData(object data)
+    {
+        Console.WriteLine("Parsing JSON data with specialized parser");
+        return new { ParsedRecords = 500 };
+    }
+
+    protected override object AnalyzeData(object data)
+    {
+        Console.WriteLine("Analyzing JSON data with ML model");
+        return new { Predictions = "Churn risk: High" };
+    }
+}
+
+// Usage
+var csvMiner = new CsvDataMiner();
+csvMiner.Mine("data.csv");
+
+Console.WriteLine();
+
+var jsonMiner = new JsonDataMiner();
+jsonMiner.Mine("data.json");</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Implementation (Python)</h2>
+                    <pre><code class="language-python">from abc import ABC, abstractmethod
+
+# Abstract Class - Template Method
+class DataMiner(ABC):
+    # Template Method - defines algorithm skeleton
+    def mine(self, path: str) -> None:
+        file = self.open_file(path)
+        data = self.extract_data(file)
+        parsed = self.parse_data(data)
+        analyzed = self.analyze_data(parsed)
+        self.send_report(analyzed)
+        self.close_file(file)
+    
+    # Common steps with default implementation
+    def open_file(self, path: str) -> object:
+        print(f"Opening file: {path}")
+        return {"path": path}
+    
+    def close_file(self, file: object) -> None:
+        print("Closing file")
+    
+    # Abstract steps - must be implemented by subclasses
+    @abstractmethod
+    def extract_data(self, file: object) -> object:
+        pass
+    
+    @abstractmethod
+    def parse_data(self, data: object) -> object:
+        pass
+    
+    @abstractmethod
+    def analyze_data(self, data: object) -> object:
+        pass
+    
+    # Hook - optional override point
+    def send_report(self, data: object) -> None:
+        print("Sending report via default channel")
+
+# Concrete Class - CSV Data Miner
+class CsvDataMiner(DataMiner):
+    def extract_data(self, file: object) -> object:
+        print("Extracting CSV data")
+        return {"type": "CSV", "rows": 1000}
+    
+    def parse_data(self, data: object) -> object:
+        print("Parsing CSV data")
+        return {"parsed_rows": 950}
+    
+    def analyze_data(self, data: object) -> object:
+        print("Analyzing CSV data")
+        return {"insights": "Sales increased 20%"}
+    
+    def send_report(self, data: object) -> None:
+        print(f"Sending CSV report via Email: {data}")
+
+# Concrete Class - JSON Data Miner
+class JsonDataMiner(DataMiner):
+    def extract_data(self, file: object) -> object:
+        print("Extracting JSON data")
+        return {"type": "JSON", "records": 500}
+    
+    def parse_data(self, data: object) -> object:
+        print("Parsing JSON data with specialized parser")
+        return {"parsed_records": 500}
+    
+    def analyze_data(self, data: object) -> object:
+        print("Analyzing JSON data with ML model")
+        return {"predictions": "Churn risk: High"}
+
+# Usage
+csv_miner = CsvDataMiner()
+csv_miner.mine("data.csv")
+
+print()
+
+json_miner = JsonDataMiner()
+json_miner.mine("data.json")</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Real-World Examples</h2>
+                    <ul>
+                        <li><strong>ASP.NET Core Middleware:</strong> Pipeline processing dengan predefined steps
+                            (authentication, authorization, routing, endpoint execution)</li>
+                        <li><strong>Unit Testing Frameworks:</strong> Test lifecycle (SetUp, ExecuteTest, TearDown)
+                            dengan custom test implementations</li>
+                        <li><strong>Game Development:</strong> Game loop template (ProcessInput, Update, Render) dengan
+                            game-specific implementations</li>
+                        <li><strong>Document Generators:</strong> Template untuk generate berbagai format (PDF, Word,
+                            HTML) dengan common structure</li>
+                    </ul>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Pros and Cons</h2>
+                    <div class="pros-cons-grid">
+                        <div class="pros">
+                            <h3><i class="fas fa-check-circle"></i> Pros</h3>
+                            <ul>
+                                <li>Code reuse dengan mendefinisikan common algorithm structure di satu tempat</li>
+                                <li>Clients hanya perlu override steps yang diperlukan</li>
+                                <li>Centralized control atas algorithm flow</li>
+                                <li>Easy to add new variants dengan subclassing</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h3><i class="fas fa-times-circle"></i> Cons</h3>
+                            <ul>
+                                <li>Violation of Liskov Substitution jika subclass harus suppress step dari base class
+                                </li>
+                                <li>Template methods dengan banyak steps bisa sulit dimaintain</li>
+                                <li>Tight coupling melalui inheritance</li>
+                                <li>Lebih rigid dibanding composition-based patterns seperti Strategy</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Template Method vs Strategy</h2>
+                    <p><strong>Template Method:</strong> Works at class level, menggunakan inheritance. Struktur
+                        algorithm fixed di base class.</p>
+                    <p><strong>Strategy:</strong> Works at object level, menggunakan composition. Entire algorithm dapat
+                        diganti at runtime.</p>
+                </section>
+
+                <div class="doc-navigation">
+                    <a href="strategy.html" class="nav-prev"><i class="fas fa-arrow-left"></i> Strategy</a>
+                    <a href="command.html" class="nav-next">Command <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </article>
+        </main>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                document.getElementById('sidebar').innerHTML = sidebarContent;
+                
+                // Re-run sidebar initialization from main.js
+                const event = new Event('sidebarLoaded');
+                document.dispatchEvent(event);
+            });
+    </script>
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                const sidebarElement = document.getElementById('sidebar');
+                
+                if (sidebarElement) {
+                    sidebarElement.innerHTML = sidebarContent;
+                    console.log('âœ… Sidebar loaded successfully');
+                    
+                    // Dispatch event after sidebar is loaded
+                    const event = new Event('sidebarLoaded');
+                    document.dispatchEvent(event);
+                } else {
+                    console.error('âŒ Sidebar element not found');
+                }
+            })
+            .catch(error => {
+                console.error('âŒ Error loading sidebar:', error);
+            });
+    </script>
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>

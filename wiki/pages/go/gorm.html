@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GORM ORM - Go Development</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div id="sidebarContainer"></div>
+
+    <div class="container">
+        <main class="content">
+            <div class="page-header">
+                <div class="breadcrumb">
+                    <a href="../../index.html">Home</a>
+                    <span>/</span>
+                    <a href="#">Go Development</a>
+                    <span>/</span>
+                    <span>GORM ORM</span>
+                </div>
+                <h1><i class="fas fa-database"></i> GORM - The ORM for Go</h1>
+                <p class="page-description">Master GORM, the fantastic ORM library for Golang with full-featured
+                    migrations, associations, and hooks.</p>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-rocket"></i> Setup & Connection</h2>
+                <pre><code>// Installation
+go get -u gorm.io/gorm
+go get -u gorm.io/driver/postgres
+go get -u gorm.io/driver/mysql
+go get -u gorm.io/driver/sqlite
+
+package main
+
+import (
+    "fmt"
+    "log"
+    
+    "gorm.io/driver/postgres"
+    "gorm.io/gorm"
+    "gorm.io/gorm/logger"
+)
+
+func main() {
+    // PostgreSQL connection
+    dsn := "host=localhost user=postgres password=secret dbname=testdb port=5432 sslmode=disable"
+    db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+        Logger: logger.Default.LogMode(logger.Info),
+    })
+    if err != nil {
+        log.Fatal("Failed to connect to database:", err)
+    }
+    
+    fmt.Println("Database connected successfully")
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-table"></i> Model Definition</h2>
+                <pre><code>package main
+
+import (
+    "time"
+    "gorm.io/gorm"
+)
+
+// Base model with common fields
+type BaseModel struct {
+    ID        uint           `gorm:"primarykey" json:"id"`
+    CreatedAt time.Time      `json:"created_at"`
+    UpdatedAt time.Time      `json:"updated_at"`
+    DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+}
+
+// User model
+type User struct {
+    BaseModel
+    Name     string    `gorm:"size:100;not null" json:"name"`
+    Email    string    `gorm:"uniqueIndex;not null" json:"email"`
+    Age      int       `gorm:"check:age > 0" json:"age"`
+    Active   bool      `gorm:"default:true" json:"active"`
+    Profile  Profile   `gorm:"constraint:OnDelete:CASCADE" json:"profile"`
+    Posts    []Post    `json:"posts"`
+    Tags     []Tag     `gorm:"many2many:user_tags" json:"tags"`
+}
+
+// Profile model (One-to-One)
+type Profile struct {
+    ID        uint   `gorm:"primarykey"`
+    UserID    uint   `gorm:"uniqueIndex"`
+    Bio       string `gorm:"type:text"`
+    Avatar    string
+    CreatedAt time.Time
+}
+
+// Post model (One-to-Many)
+type Post struct {
+    ID        uint      `gorm:"primarykey"`
+    UserID    uint      `gorm:"index"`
+    Title     string    `gorm:"size:200;not null"`
+    Content   string    `gorm:"type:text"`
+    Published bool      `gorm:"default:false"`
+    Views     int       `gorm:"default:0"`
+    CreatedAt time.Time
+    UpdatedAt time.Time
+}
+
+// Tag model (Many-to-Many)
+type Tag struct {
+    ID    uint   `gorm:"primarykey"`
+    Name  string `gorm:"uniqueIndex;size:50"`
+    Users []User `gorm:"many2many:user_tags"`
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-sync"></i> Auto Migration</h2>
+                <pre><code>package main
+
+import (
+    "gorm.io/gorm"
+)
+
+func migrateDatabase(db *gorm.DB) error {
+    // Auto migrate models
+    return db.AutoMigrate(
+        &User{},
+        &Profile{},
+        &Post{},
+        &Tag{},
+    )
+}
+
+// Manual migration with custom SQL
+func customMigration(db *gorm.DB) error {
+    // Create custom index
+    db.Exec("CREATE INDEX idx_user_email_active ON users(email, active)")
+    
+    // Add column if not exists
+    if !db.Migrator().HasColumn(&User{}, "LastLogin") {
+        db.Migrator().AddColumn(&User{}, "LastLogin")
+    }
+    
+    return nil
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-code"></i> CRUD Operations</h2>
+                <pre><code>package main
+
+import (
+    "gorm.io/gorm"
+)
+
+// CREATE
+func createUser(db *gorm.DB) (*User, error) {
+    user := User{
+        Name:  "John Doe",
+        Email: "john@example.com",
+        Age:   30,
+        Profile: Profile{
+            Bio:    "Software Engineer",
+            Avatar: "avatar.jpg",
+        },
+    }
+    
+    result := db.Create(&user)
+    return &user, result.Error
+}
+
+// Batch insert
+func createUsers(db *gorm.DB) error {
+    users := []User{
+        {Name: "User 1", Email: "user1@example.com", Age: 25},
+        {Name: "User 2", Email: "user2@example.com", Age: 28},
+        {Name: "User 3", Email: "user3@example.com", Age: 32},
+    }
+    
+    return db.Create(&users).Error
+}
+
+// READ - Single record
+func getUserByID(db *gorm.DB, id uint) (*User, error) {
+    var user User
+    result := db.First(&user, id)
+    return &user, result.Error
+}
+
+// READ - With conditions
+func getUserByEmail(db *gorm.DB, email string) (*User, error) {
+    var user User
+    result := db.Where("email = ?", email).First(&user)
+    return &user, result.Error
+}
+
+// READ - Multiple records
+func getActiveUsers(db *gorm.DB) ([]User, error) {
+    var users []User
+    result := db.Where("active = ?", true).Find(&users)
+    return users, result.Error
+}
+
+// READ - With preloading associations
+func getUserWithRelations(db *gorm.DB, id uint) (*User, error) {
+    var user User
+    result := db.
+        Preload("Profile").
+        Preload("Posts").
+        Preload("Tags").
+        First(&user, id)
+    return &user, result.Error
+}
+
+// UPDATE - Single field
+func updateUserAge(db *gorm.DB, id uint, age int) error {
+    return db.Model(&User{}).Where("id = ?", id).Update("age", age).Error
+}
+
+// UPDATE - Multiple fields
+func updateUser(db *gorm.DB, id uint, updates map[string]interface{}) error {
+    return db.Model(&User{}).Where("id = ?", id).Updates(updates).Error
+}
+
+// UPDATE - Using struct
+func updateUserStruct(db *gorm.DB, user *User) error {
+    return db.Save(user).Error
+}
+
+// DELETE - Soft delete (with DeletedAt)
+func softDeleteUser(db *gorm.DB, id uint) error {
+    return db.Delete(&User{}, id).Error
+}
+
+// DELETE - Permanent delete
+func hardDeleteUser(db *gorm.DB, id uint) error {
+    return db.Unscoped().Delete(&User{}, id).Error
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-search"></i> Advanced Queries</h2>
+                <pre><code>package main
+
+import (
+    "gorm.io/gorm"
+)
+
+// Pagination
+func getUsersPaginated(db *gorm.DB, page, pageSize int) ([]User, int64, error) {
+    var users []User
+    var total int64
+    
+    offset := (page - 1) * pageSize
+    
+    // Get total count
+    db.Model(&User{}).Count(&total)
+    
+    // Get paginated results
+    result := db.
+        Limit(pageSize).
+        Offset(offset).
+        Order("created_at DESC").
+        Find(&users)
+    
+    return users, total, result.Error
+}
+
+// Complex queries
+func advancedSearch(db *gorm.DB) ([]User, error) {
+    var users []User
+    
+    result := db.
+        Where("age BETWEEN ? AND ?", 18, 65).
+        Where("active = ?", true).
+        Where("email LIKE ?", "%@example.com").
+        Or("name IN ?", []string{"Admin", "SuperUser"}).
+        Order("created_at DESC").
+        Limit(100).
+        Find(&users)
+    
+    return users, result.Error
+}
+
+// Joins
+func getUsersWithPosts(db *gorm.DB) ([]User, error) {
+    var users []User
+    
+    result := db.
+        Joins("JOIN posts ON posts.user_id = users.id").
+        Where("posts.published = ?", true).
+        Group("users.id").
+        Having("COUNT(posts.id) > ?", 5).
+        Find(&users)
+    
+    return users, result.Error
+}
+
+// Raw SQL
+func customQuery(db *gorm.DB) ([]map[string]interface{}, error) {
+    var results []map[string]interface{}
+    
+    result := db.Raw(`
+        SELECT u.name, COUNT(p.id) as post_count
+        FROM users u
+        LEFT JOIN posts p ON p.user_id = u.id
+        GROUP BY u.id, u.name
+        ORDER BY post_count DESC
+        LIMIT 10
+    `).Scan(&results)
+    
+    return results, result.Error
+}
+
+// Scopes (reusable query logic)
+func AmountGreaterThan1000(db *gorm.DB) *gorm.DB {
+    return db.Where("amount > ?", 1000)
+}
+
+func PaidWithCreditCard(db *gorm.DB) *gorm.DB {
+    return db.Where("pay_mode_sign = ?", "C")
+}
+
+func PaidWithCod(db *gorm.DB) *gorm.DB {
+    return db.Where("pay_mode_sign = ?", "COD")
+}
+
+// Using scopes
+func findOrders(db *gorm.DB) ([]Order, error) {
+    var orders []Order
+    db.Scopes(AmountGreaterThan1000, PaidWithCreditCard).Find(&orders)
+    return orders, nil
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-cogs"></i> Hooks & Callbacks</h2>
+                <pre><code>package main
+
+import (
+    "errors"
+    "gorm.io/gorm"
+)
+
+type User struct {
+    BaseModel
+    Name     string
+    Email    string
+    Password string `json:"-"` // Never expose in JSON
+}
+
+// Before Create
+func (u *User) BeforeCreate(tx *gorm.DB) error {
+    if u.Email == "" {
+        return errors.New("email is required")
+    }
+    
+    // Hash password before saving
+    // u.Password = hashPassword(u.Password)
+    
+    return nil
+}
+
+// After Create
+func (u *User) AfterCreate(tx *gorm.DB) error {
+    // Send welcome email
+    // sendWelcomeEmail(u.Email)
+    
+    return nil
+}
+
+// Before Update
+func (u *User) BeforeUpdate(tx *gorm.DB) error {
+    // Validate changes
+    if tx.Statement.Changed("Email") {
+        // Verify email is not taken
+    }
+    
+    return nil
+}
+
+// After Find
+func (u *User) AfterFind(tx *gorm.DB) error {
+    // Log access
+    // logUserAccess(u.ID)
+    
+    return nil
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-exchange-alt"></i> Transactions</h2>
+                <pre><code>package main
+
+import (
+    "gorm.io/gorm"
+)
+
+// Manual transaction
+func transferMoney(db *gorm.DB, fromID, toID uint, amount float64) error {
+    return db.Transaction(func(tx *gorm.DB) error {
+        // Deduct from sender
+        if err := tx.Model(&Account{}).
+            Where("id = ?", fromID).
+            Update("balance", gorm.Expr("balance - ?", amount)).Error; err != nil {
+            return err
+        }
+        
+        // Add to receiver
+        if err := tx.Model(&Account{}).
+            Where("id = ?", toID).
+            Update("balance", gorm.Expr("balance + ?", amount)).Error; err != nil {
+            return err
+        }
+        
+        // Create transaction record
+        transaction := Transaction{
+            FromID: fromID,
+            ToID:   toID,
+            Amount: amount,
+        }
+        
+        return tx.Create(&transaction).Error
+    })
+}
+
+// Nested transactions
+func nestedTransaction(db *gorm.DB) error {
+    return db.Transaction(func(tx *gorm.DB) error {
+        tx.Create(&User{Name: "User1"})
+        
+        // Nested transaction
+        return tx.Transaction(func(tx2 *gorm.DB) error {
+            tx2.Create(&User{Name: "User2"})
+            return nil
+        })
+    })
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-check-circle"></i> Best Practices</h2>
+                <div class="tip-box">
+                    <ul>
+                        <li>✅ Always use prepared statements (GORM does this by default)</li>
+                        <li>✅ Use preloading to avoid N+1 queries</li>
+                        <li>✅ Index foreign keys and frequently queried columns</li>
+                        <li>✅ Use scopes for reusable query logic</li>
+                        <li>✅ Implement soft deletes for important data</li>
+                        <li>✅ Use transactions for operations that must succeed or fail together</li>
+                        <li>✅ Enable connection pooling for production</li>
+                        <li>✅ Use hooks for business logic, not for side effects</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="navigation-links">
+                <a href="rest-api-gin.html" class="nav-link"><i class="fas fa-arrow-left"></i> Previous: REST API with
+                    Gin</a>
+                <a href="testing.html" class="nav-link">Next: Testing <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebar = doc.querySelector('.sidebar');
+                if (sidebar) {
+                    document.getElementById('sidebarContainer').appendChild(sidebar);
+                    const event = new Event('sidebarLoaded');
+                    document.dispatchEvent(event);
+                }
+            });
+    </script>
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>

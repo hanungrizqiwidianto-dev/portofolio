@@ -1,0 +1,375 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decorator Pattern - Hanung's Dev Wiki</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-left">
+            <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+            <a href="../../index.html" class="logo"><i class="fas fa-code"></i><span>Hanung's Dev Wiki</span></a>
+        </div>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar" id="sidebar"></aside>
+        <main class="main-content">
+            <div class="breadcrumb">
+                <a href="../../index.html">Home</a><span>/</span>
+                <a href="#">Design Patterns</a><span>/</span>
+                <span>Decorator Pattern</span>
+            </div>
+
+            <article class="doc-article">
+                <h1>Decorator Pattern</h1>
+                <div class="doc-meta">
+                    <span class="badge badge-structural">Structural Pattern</span>
+                    <span class="doc-date"><i class="fas fa-calendar"></i> Updated: Nov 25, 2025</span>
+                </div>
+
+                <section class="doc-section">
+                    <h2>Overview</h2>
+                    <p>
+                        Decorator is a structural design pattern that lets you attach new behaviors to objects by
+                        placing
+                        these objects inside special wrapper objects that contain the behaviors. It allows behavior to
+                        be added
+                        to individual objects, dynamically, without affecting the behavior of other objects from the
+                        same class.
+                    </p>
+                    <div class="info-box">
+                        <i class="fas fa-lightbulb"></i>
+                        <div>
+                            <strong>When to use:</strong> When you need to add responsibilities to objects dynamically
+                            and
+                            transparently without affecting other objects. When extension by subclassing is impractical
+                            or
+                            when you want to add functionality that can be withdrawn.
+                        </div>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Problem</h2>
+                    <p>
+                        You're working on a notification library. Initially, it only sends emails. Later, you need to
+                        add SMS,
+                        Slack, and Facebook notifications. You could create subclasses for each combination
+                        (EmailNotification,
+                        SMSNotification, EmailAndSMSNotification, etc.), but this leads to combinatorial explosion of
+                        classes.
+                    </p>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Solution</h2>
+                    <p>
+                        Instead of inheritance, use "wrappers" (decorators). A wrapper is an object that can be linked
+                        with a target
+                        object. The wrapper delegates the request to the target and may perform something either before
+                        or after.
+                    </p>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Implementation in C#</h2>
+
+                    <h3>Component Interface</h3>
+                    <pre><code class="language-csharp">// Component interface
+public interface INotifier
+{
+    void Send(string message);
+}
+
+// Concrete Component
+public class EmailNotifier : INotifier
+{
+    public void Send(string message)
+    {
+        Console.WriteLine($"Sending email: {message}");
+    }
+}
+
+// Base Decorator
+public abstract class NotifierDecorator : INotifier
+{
+    protected INotifier _notifier;
+
+    public NotifierDecorator(INotifier notifier)
+    {
+        _notifier = notifier;
+    }
+
+    public virtual void Send(string message)
+    {
+        _notifier.Send(message);
+    }
+}
+
+// Concrete Decorators
+public class SMSDecorator : NotifierDecorator
+{
+    public SMSDecorator(INotifier notifier) : base(notifier) { }
+
+    public override void Send(string message)
+    {
+        base.Send(message);
+        Console.WriteLine($"Sending SMS: {message}");
+    }
+}
+
+public class SlackDecorator : NotifierDecorator
+{
+    public SlackDecorator(INotifier notifier) : base(notifier) { }
+
+    public override void Send(string message)
+    {
+        base.Send(message);
+        Console.WriteLine($"Sending Slack message: {message}");
+    }
+}
+
+public class FacebookDecorator : NotifierDecorator
+{
+    public FacebookDecorator(INotifier notifier) : base(notifier) { }
+
+    public override void Send(string message)
+    {
+        base.Send(message);
+        Console.WriteLine($"Posting to Facebook: {message}");
+    }
+}</code></pre>
+
+                    <h3>Usage</h3>
+                    <pre><code class="language-csharp">// Simple email notification
+INotifier notifier = new EmailNotifier();
+notifier.Send("Hello!");
+
+// Email + SMS
+INotifier emailAndSMS = new SMSDecorator(new EmailNotifier());
+emailAndSMS.Send("Important update");
+
+// Email + SMS + Slack + Facebook
+INotifier allChannels = new FacebookDecorator(
+    new SlackDecorator(
+        new SMSDecorator(
+            new EmailNotifier()
+        )
+    )
+);
+allChannels.Send("Critical alert!");</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Implementation in Python</h2>
+
+                    <pre><code class="language-python">from abc import ABC, abstractmethod
+
+# Component
+class Notifier(ABC):
+    @abstractmethod
+    def send(self, message: str):
+        pass
+
+class EmailNotifier(Notifier):
+    def send(self, message: str):
+        print(f"Sending email: {message}")
+
+# Base Decorator
+class NotifierDecorator(Notifier):
+    def __init__(self, notifier: Notifier):
+        self._notifier = notifier
+    
+    def send(self, message: str):
+        self._notifier.send(message)
+
+# Concrete Decorators
+class SMSDecorator(NotifierDecorator):
+    def send(self, message: str):
+        super().send(message)
+        print(f"Sending SMS: {message}")
+
+class SlackDecorator(NotifierDecorator):
+    def send(self, message: str):
+        super().send(message)
+        print(f"Sending Slack: {message}")
+
+# Usage
+notifier = EmailNotifier()
+notifier = SMSDecorator(notifier)
+notifier = SlackDecorator(notifier)
+notifier.send("Hello!")
+
+# Output:
+# Sending email: Hello!
+# Sending SMS: Hello!
+# Sending Slack: Hello!</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Real-World Example: Coffee Shop</h2>
+                    <pre><code class="language-csharp">public interface ICoffee
+{
+    string GetDescription();
+    double GetCost();
+}
+
+public class SimpleCoffee : ICoffee
+{
+    public string GetDescription() => "Simple coffee";
+    public double GetCost() => 2.0;
+}
+
+public abstract class CoffeeDecorator : ICoffee
+{
+    protected ICoffee _coffee;
+    
+    public CoffeeDecorator(ICoffee coffee)
+    {
+        _coffee = coffee;
+    }
+    
+    public virtual string GetDescription() => _coffee.GetDescription();
+    public virtual double GetCost() => _coffee.GetCost();
+}
+
+public class MilkDecorator : CoffeeDecorator
+{
+    public MilkDecorator(ICoffee coffee) : base(coffee) { }
+    
+    public override string GetDescription() => _coffee.GetDescription() + ", milk";
+    public override double GetCost() => _coffee.GetCost() + 0.5;
+}
+
+public class SugarDecorator : CoffeeDecorator
+{
+    public SugarDecorator(ICoffee coffee) : base(coffee) { }
+    
+    public override string GetDescription() => _coffee.GetDescription() + ", sugar";
+    public override double GetCost() => _coffee.GetCost() + 0.2;
+}
+
+public class WhippedCreamDecorator : CoffeeDecorator
+{
+    public WhippedCreamDecorator(ICoffee coffee) : base(coffee) { }
+    
+    public override string GetDescription() => _coffee.GetDescription() + ", whipped cream";
+    public override double GetCost() => _coffee.GetCost() + 0.7;
+}
+
+// Usage
+ICoffee coffee = new SimpleCoffee();
+Console.WriteLine($"{coffee.GetDescription()} - ${coffee.GetCost()}");
+
+coffee = new MilkDecorator(coffee);
+coffee = new SugarDecorator(coffee);
+coffee = new WhippedCreamDecorator(coffee);
+
+Console.WriteLine($"{coffee.GetDescription()} - ${coffee.GetCost()}");
+// Output: Simple coffee, milk, sugar, whipped cream - $3.4</code></pre>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Pros and Cons</h2>
+                    <div class="pros-cons-grid">
+                        <div class="pros-box">
+                            <h3><i class="fas fa-check-circle"></i> Advantages</h3>
+                            <ul>
+                                <li>More flexible than static inheritance</li>
+                                <li>Extends object's behavior without making a new subclass</li>
+                                <li>Add or remove responsibilities at runtime</li>
+                                <li>Combine several behaviors by wrapping multiple decorators</li>
+                                <li>Single Responsibility Principle - divide functionality into classes</li>
+                            </ul>
+                        </div>
+                        <div class="cons-box">
+                            <h3><i class="fas fa-times-circle"></i> Disadvantages</h3>
+                            <ul>
+                                <li>Hard to remove a specific wrapper from the stack</li>
+                                <li>Hard to implement decorator whose behavior doesn't depend on order</li>
+                                <li>Initial configuration code of layers might look ugly</li>
+                                <li>Many small objects that differ only in how they interconnect</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>Real-World Examples</h2>
+                    <ul>
+                        <li><strong>Java I/O Streams:</strong> BufferedInputStream, DataInputStream wrap basic streams
+                        </li>
+                        <li><strong>.NET Streams:</strong> CryptoStream, GZipStream decorating file streams</li>
+                        <li><strong>Middleware in ASP.NET Core:</strong> Each middleware decorates the request pipeline
+                        </li>
+                        <li><strong>Python Decorators:</strong> @property, @staticmethod, @functools.lru_cache</li>
+                    </ul>
+                </section>
+
+                <div class="doc-navigation">
+                    <a href="abstract-factory.html" class="nav-prev"><i class="fas fa-arrow-left"></i><span>Abstract
+                            Factory</span></a>
+                    <a href="adapter.html" class="nav-next"><span>Adapter</span><i class="fas fa-arrow-right"></i></a>
+                </div>
+            </article>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                document.getElementById('sidebar').innerHTML = sidebarContent;
+                
+                // Re-run sidebar initialization from main.js
+                const event = new Event('sidebarLoaded');
+                document.dispatchEvent(event);
+            });
+    </script>
+    <script>
+        // Load sidebar dynamically
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebarContent = doc.querySelector('.sidebar').innerHTML;
+                const sidebarElement = document.getElementById('sidebar');
+                
+                if (sidebarElement) {
+                    sidebarElement.innerHTML = sidebarContent;
+                    console.log('âœ… Sidebar loaded successfully');
+                    
+                    // Dispatch event after sidebar is loaded
+                    const event = new Event('sidebarLoaded');
+                    document.dispatchEvent(event);
+                } else {
+                    console.error('âŒ Sidebar element not found');
+                }
+            })
+            .catch(error => {
+                console.error('âŒ Error loading sidebar:', error);
+            });
+    </script>
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>

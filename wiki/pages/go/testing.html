@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testing & Benchmarks - Go Development</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div id="sidebarContainer"></div>
+
+    <div class="container">
+        <main class="content">
+            <div class="page-header">
+                <div class="breadcrumb">
+                    <a href="../../index.html">Home</a>
+                    <span>/</span>
+                    <a href="#">Go Development</a>
+                    <span>/</span>
+                    <span>Testing & Benchmarks</span>
+                </div>
+                <h1><i class="fas fa-vial"></i> Testing & Benchmarking in Go</h1>
+                <p class="page-description">Master Go's built-in testing framework, write effective unit tests, and
+                    optimize code with benchmarks.</p>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-code"></i> Basic Unit Tests</h2>
+                <p>Go has built-in testing support. Test files end with <code>_test.go</code>:</p>
+
+                <pre><code>// math.go
+package math
+
+func Add(a, b int) int {
+    return a + b
+}
+
+func Divide(a, b float64) (float64, error) {
+    if b == 0 {
+        return 0, errors.New("division by zero")
+    }
+    return a / b, nil
+}
+
+// math_test.go
+package math
+
+import (
+    "testing"
+)
+
+func TestAdd(t *testing.T) {
+    result := Add(2, 3)
+    expected := 5
+    
+    if result != expected {
+        t.Errorf("Add(2, 3) = %d; want %d", result, expected)
+    }
+}
+
+func TestDivide(t *testing.T) {
+    result, err := Divide(10, 2)
+    
+    if err != nil {
+        t.Fatalf("Unexpected error: %v", err)
+    }
+    
+    if result != 5.0 {
+        t.Errorf("Divide(10, 2) = %f; want 5.0", result)
+    }
+}
+
+func TestDivideByZero(t *testing.T) {
+    _, err := Divide(10, 0)
+    
+    if err == nil {
+        t.Error("Expected error for division by zero")
+    }
+}
+
+// Run tests: go test
+// Run with coverage: go test -cover
+// Run with verbose: go test -v</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-table"></i> Table-Driven Tests</h2>
+                <p>The idiomatic way to test multiple scenarios:</p>
+
+                <pre><code>package math
+
+import "testing"
+
+func TestAddTableDriven(t *testing.T) {
+    tests := []struct {
+        name     string
+        a        int
+        b        int
+        expected int
+    }{
+        {"positive numbers", 2, 3, 5},
+        {"negative numbers", -2, -3, -5},
+        {"mixed signs", -2, 3, 1},
+        {"with zero", 0, 5, 5},
+    }
+    
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            result := Add(tt.a, tt.b)
+            if result != tt.expected {
+                t.Errorf("Add(%d, %d) = %d; want %d",
+                    tt.a, tt.b, result, tt.expected)
+            }
+        })
+    }
+}
+
+// Complex validation example
+func TestUserValidation(t *testing.T) {
+    tests := []struct {
+        name        string
+        user        User
+        wantErr     bool
+        errContains string
+    }{
+        {
+            name: "valid user",
+            user: User{Name: "John", Email: "john@example.com", Age: 30},
+            wantErr: false,
+        },
+        {
+            name: "empty name",
+            user: User{Name: "", Email: "john@example.com", Age: 30},
+            wantErr: true,
+            errContains: "name is required",
+        },
+        {
+            name: "invalid email",
+            user: User{Name: "John", Email: "invalid", Age: 30},
+            wantErr: true,
+            errContains: "invalid email",
+        },
+        {
+            name: "negative age",
+            user: User{Name: "John", Email: "john@example.com", Age: -5},
+            wantErr: true,
+            errContains: "age must be positive",
+        },
+    }
+    
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            err := ValidateUser(tt.user)
+            
+            if (err != nil) != tt.wantErr {
+                t.Errorf("ValidateUser() error = %v, wantErr %v", err, tt.wantErr)
+                return
+            }
+            
+            if tt.wantErr && !strings.Contains(err.Error(), tt.errContains) {
+                t.Errorf("Error message '%s' should contain '%s'", 
+                    err.Error(), tt.errContains)
+            }
+        })
+    }
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-sitemap"></i> Test Helpers & Setup/Teardown</h2>
+                <pre><code>package database
+
+import (
+    "testing"
+    "gorm.io/driver/sqlite"
+    "gorm.io/gorm"
+)
+
+// Test helper
+func setupTestDB(t *testing.T) *gorm.DB {
+    t.Helper() // Marks this as a helper function
+    
+    db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+    if err != nil {
+        t.Fatalf("Failed to connect database: %v", err)
+    }
+    
+    // Auto migrate
+    db.AutoMigrate(&User{})
+    
+    return db
+}
+
+func TestUserRepository(t *testing.T) {
+    db := setupTestDB(t)
+    repo := NewUserRepository(db)
+    
+    // Test create
+    user := &User{Name: "John", Email: "john@example.com"}
+    err := repo.Create(user)
+    if err != nil {
+        t.Fatalf("Failed to create user: %v", err)
+    }
+    
+    // Test find
+    found, err := repo.FindByEmail("john@example.com")
+    if err != nil {
+        t.Fatalf("Failed to find user: %v", err)
+    }
+    
+    if found.Name != "John" {
+        t.Errorf("Expected name 'John', got '%s'", found.Name)
+    }
+}
+
+// TestMain for setup/teardown
+func TestMain(m *testing.M) {
+    // Setup before all tests
+    setupGlobalTestEnvironment()
+    
+    // Run tests
+    code := m.Run()
+    
+    // Cleanup after all tests
+    cleanupGlobalTestEnvironment()
+    
+    os.Exit(code)
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-puzzle-piece"></i> Mocking with Interfaces</h2>
+                <pre><code>package service
+
+import "testing"
+
+// Interface to mock
+type UserRepository interface {
+    FindByID(id int) (*User, error)
+    Create(user *User) error
+}
+
+// Mock implementation
+type MockUserRepository struct {
+    FindByIDFunc func(id int) (*User, error)
+    CreateFunc   func(user *User) error
+}
+
+func (m *MockUserRepository) FindByID(id int) (*User, error) {
+    if m.FindByIDFunc != nil {
+        return m.FindByIDFunc(id)
+    }
+    return nil, nil
+}
+
+func (m *MockUserRepository) Create(user *User) error {
+    if m.CreateFunc != nil {
+        return m.CreateFunc(user)
+    }
+    return nil
+}
+
+// Service using the interface
+type UserService struct {
+    repo UserRepository
+}
+
+func (s *UserService) GetUser(id int) (*User, error) {
+    return s.repo.FindByID(id)
+}
+
+// Test using mock
+func TestUserService_GetUser(t *testing.T) {
+    mockRepo := &MockUserRepository{
+        FindByIDFunc: func(id int) (*User, error) {
+            if id == 1 {
+                return &User{ID: 1, Name: "John"}, nil
+            }
+            return nil, errors.New("user not found")
+        },
+    }
+    
+    service := &UserService{repo: mockRepo}
+    
+    // Test success case
+    user, err := service.GetUser(1)
+    if err != nil {
+        t.Fatalf("Unexpected error: %v", err)
+    }
+    if user.Name != "John" {
+        t.Errorf("Expected name 'John', got '%s'", user.Name)
+    }
+    
+    // Test error case
+    _, err = service.GetUser(999)
+    if err == nil {
+        t.Error("Expected error for non-existent user")
+    }
+}
+
+// Using testify/mock library
+import (
+    "github.com/stretchr/testify/mock"
+    "github.com/stretchr/testify/assert"
+)
+
+type MockRepository struct {
+    mock.Mock
+}
+
+func (m *MockRepository) FindByID(id int) (*User, error) {
+    args := m.Called(id)
+    if args.Get(0) == nil {
+        return nil, args.Error(1)
+    }
+    return args.Get(0).(*User), args.Error(1)
+}
+
+func TestWithTestify(t *testing.T) {
+    mockRepo := new(MockRepository)
+    
+    // Set expectations
+    mockRepo.On("FindByID", 1).Return(&User{ID: 1, Name: "John"}, nil)
+    
+    service := &UserService{repo: mockRepo}
+    user, err := service.GetUser(1)
+    
+    assert.NoError(t, err)
+    assert.Equal(t, "John", user.Name)
+    
+    // Assert expectations were met
+    mockRepo.AssertExpectations(t)
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-tachometer-alt"></i> Benchmarking</h2>
+                <pre><code>package performance
+
+import "testing"
+
+// Function to benchmark
+func Fibonacci(n int) int {
+    if n <= 1 {
+        return n
+    }
+    return Fibonacci(n-1) + Fibonacci(n-2)
+}
+
+// Benchmark test
+func BenchmarkFibonacci10(b *testing.B) {
+    for i := 0; i < b.N; i++ {
+        Fibonacci(10)
+    }
+}
+
+func BenchmarkFibonacci20(b *testing.B) {
+    for i := 0; i < b.N; i++ {
+        Fibonacci(20)
+    }
+}
+
+// Run benchmarks: go test -bench=.
+// With memory stats: go test -bench=. -benchmem
+
+// Advanced benchmark with setup
+func BenchmarkMapVsSlice(b *testing.B) {
+    sizes := []int{10, 100, 1000, 10000}
+    
+    for _, size := range sizes {
+        b.Run(fmt.Sprintf("Map-%d", size), func(b *testing.B) {
+            m := make(map[int]int, size)
+            b.ResetTimer() // Reset timer after setup
+            
+            for i := 0; i < b.N; i++ {
+                for j := 0; j < size; j++ {
+                    m[j] = j
+                }
+            }
+        })
+        
+        b.Run(fmt.Sprintf("Slice-%d", size), func(b *testing.B) {
+            s := make([]int, size)
+            b.ResetTimer()
+            
+            for i := 0; i < b.N; i++ {
+                for j := 0; j < size; j++ {
+                    s[j] = j
+                }
+            }
+        })
+    }
+}
+
+// Parallel benchmarks
+func BenchmarkConcurrent(b *testing.B) {
+    b.RunParallel(func(pb *testing.PB) {
+        for pb.Next() {
+            // Code to benchmark in parallel
+            processRequest()
+        }
+    })
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-globe"></i> HTTP Testing</h2>
+                <pre><code>package api
+
+import (
+    "net/http"
+    "net/http/httptest"
+    "testing"
+    "github.com/gin-gonic/gin"
+)
+
+func TestGetUserHandler(t *testing.T) {
+    // Setup
+    gin.SetMode(gin.TestMode)
+    router := gin.Default()
+    router.GET("/users/:id", getUserHandler)
+    
+    // Create test request
+    req, _ := http.NewRequest("GET", "/users/1", nil)
+    
+    // Record response
+    w := httptest.NewRecorder()
+    
+    // Execute request
+    router.ServeHTTP(w, req)
+    
+    // Assertions
+    if w.Code != http.StatusOK {
+        t.Errorf("Expected status %d, got %d", http.StatusOK, w.Code)
+    }
+    
+    // Check response body
+    expected := `{"id":1,"name":"John"}`
+    if w.Body.String() != expected {
+        t.Errorf("Expected body %s, got %s", expected, w.Body.String())
+    }
+}
+
+// Test with JSON payload
+func TestCreateUserHandler(t *testing.T) {
+    router := gin.Default()
+    router.POST("/users", createUserHandler)
+    
+    payload := `{"name":"John","email":"john@example.com"}`
+    req, _ := http.NewRequest("POST", "/users", strings.NewReader(payload))
+    req.Header.Set("Content-Type", "application/json")
+    
+    w := httptest.NewRecorder()
+    router.ServeHTTP(w, req)
+    
+    assert.Equal(t, http.StatusCreated, w.Code)
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-check-circle"></i> Testing Best Practices</h2>
+                <div class="tip-box">
+                    <ul>
+                        <li>✅ Use table-driven tests for multiple test cases</li>
+                        <li>✅ Test one thing per test function</li>
+                        <li>✅ Use meaningful test names (Test[Function]_[Scenario])</li>
+                        <li>✅ Use t.Helper() for test helper functions</li>
+                        <li>✅ Use t.Parallel() for independent tests</li>
+                        <li>✅ Mock external dependencies (database, HTTP, etc.)</li>
+                        <li>✅ Test both success and error cases</li>
+                        <li>✅ Measure test coverage: <code>go test -cover</code></li>
+                        <li>✅ Use testify/assert for cleaner assertions</li>
+                        <li>✅ Run race detector: <code>go test -race</code></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="navigation-links">
+                <a href="gorm.html" class="nav-link"><i class="fas fa-arrow-left"></i> Previous: GORM</a>
+                <a href="modules.html" class="nav-link">Next: Go Modules <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebar = doc.querySelector('.sidebar');
+                if (sidebar) {
+                    document.getElementById('sidebarContainer').appendChild(sidebar);
+                    const event = new Event('sidebarLoaded');
+                    document.dispatchEvent(event);
+                }
+            });
+    </script>
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>

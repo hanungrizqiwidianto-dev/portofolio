@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jest & Testing - Node.js Development</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div id="sidebarContainer"></div>
+
+    <div class="container">
+        <main class="content">
+            <div class="page-header">
+                <div class="breadcrumb">
+                    <a href="../../index.html">Home</a>
+                    <span>/</span>
+                    <a href="#">Node.js Development</a>
+                    <span>/</span>
+                    <span>Jest & Testing</span>
+                </div>
+                <h1><i class="fas fa-vial"></i> Testing Node.js Applications with Jest</h1>
+                <p class="page-description">Write comprehensive unit, integration, and E2E tests using Jest - the
+                    delightful JavaScript testing framework.</p>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-rocket"></i> Setup</h2>
+                <pre><code># Install Jest
+npm install --save-dev jest
+
+# For TypeScript
+npm install --save-dev @types/jest ts-jest
+
+# package.json
+{
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": ["/node_modules/"]
+  }
+}</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-code"></i> Basic Tests</h2>
+                <pre><code>// math.js
+function add(a, b) {
+    return a + b;
+}
+
+function divide(a, b) {
+    if (b === 0) throw new Error('Division by zero');
+    return a / b;
+}
+
+module.exports = { add, divide };
+
+// math.test.js
+const { add, divide } = require('./math');
+
+describe('Math functions', () => {
+    test('adds 1 + 2 to equal 3', () => {
+        expect(add(1, 2)).toBe(3);
+    });
+    
+    test('adds -1 + -2 to equal -3', () => {
+        expect(add(-1, -2)).toBe(-3);
+    });
+    
+    test('divides 10 by 2 to equal 5', () => {
+        expect(divide(10, 2)).toBe(5);
+    });
+    
+    test('throws error when dividing by zero', () => {
+        expect(() => divide(10, 0)).toThrow('Division by zero');
+    });
+});
+
+// Run: npm test</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-check-square"></i> Matchers</h2>
+                <pre><code>describe('Jest Matchers', () => {
+    test('exact equality', () => {
+        expect(2 + 2).toBe(4);
+    });
+    
+    test('object equality', () => {
+        const data = { name: 'John' };
+        expect(data).toEqual({ name: 'John' });
+    });
+    
+    test('truthiness', () => {
+        expect(true).toBeTruthy();
+        expect(false).toBeFalsy();
+        expect(null).toBeNull();
+        expect(undefined).toBeUndefined();
+        expect('hello').toBeDefined();
+    });
+    
+    test('numbers', () => {
+        expect(10).toBeGreaterThan(5);
+        expect(10).toBeGreaterThanOrEqual(10);
+        expect(5).toBeLessThan(10);
+        expect(0.1 + 0.2).toBeCloseTo(0.3);
+    });
+    
+    test('strings', () => {
+        expect('Hello World').toMatch(/World/);
+        expect('test@example.com').toContain('@');
+    });
+    
+    test('arrays', () => {
+        const arr = ['apple', 'banana', 'orange'];
+        expect(arr).toContain('banana');
+        expect(arr).toHaveLength(3);
+    });
+    
+    test('exceptions', () => {
+        expect(() => {
+            throw new Error('Failed');
+        }).toThrow('Failed');
+    });
+});</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-sitemap"></i> Mocking</h2>
+                <pre><code>// userService.js
+class UserService {
+    constructor(database) {
+        this.db = database;
+    }
+    
+    async getUser(id) {
+        return await this.db.findUser(id);
+    }
+    
+    async createUser(data) {
+        if (!data.email) throw new Error('Email required');
+        return await this.db.insertUser(data);
+    }
+}
+
+// userService.test.js
+describe('UserService', () => {
+    let mockDatabase;
+    let userService;
+    
+    beforeEach(() => {
+        mockDatabase = {
+            findUser: jest.fn(),
+            insertUser: jest.fn()
+        };
+        userService = new UserService(mockDatabase);
+    });
+    
+    test('getUser calls database with correct id', async () => {
+        mockDatabase.findUser.mockResolvedValue({ 
+            id: 1, 
+            name: 'John' 
+        });
+        
+        const user = await userService.getUser(1);
+        
+        expect(mockDatabase.findUser).toHaveBeenCalledWith(1);
+        expect(mockDatabase.findUser).toHaveBeenCalledTimes(1);
+        expect(user).toEqual({ id: 1, name: 'John' });
+    });
+    
+    test('createUser validates email', async () => {
+        await expect(
+            userService.createUser({ name: 'John' })
+        ).rejects.toThrow('Email required');
+        
+        expect(mockDatabase.insertUser).not.toHaveBeenCalled();
+    });
+    
+    test('createUser inserts valid user', async () => {
+        const newUser = { name: 'John', email: 'john@example.com' };
+        mockDatabase.insertUser.mockResolvedValue({ id: 1, ...newUser });
+        
+        const result = await userService.createUser(newUser);
+        
+        expect(mockDatabase.insertUser).toHaveBeenCalledWith(newUser);
+        expect(result.id).toBe(1);
+    });
+});
+
+// Mock entire modules
+jest.mock('./database', () => ({
+    connect: jest.fn(),
+    query: jest.fn()
+}));
+
+// Spy on methods
+const spy = jest.spyOn(console, 'log');
+console.log('test');
+expect(spy).toHaveBeenCalledWith('test');
+spy.mockRestore();</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-sync"></i> Async Testing</h2>
+                <pre><code>// Using callbacks
+test('callback test', (done) => {
+    function callback(data) {
+        expect(data).toBe('result');
+        done();
+    }
+    
+    fetchData(callback);
+});
+
+// Using Promises
+test('promise test', () => {
+    return fetchData().then(data => {
+        expect(data).toBe('result');
+    });
+});
+
+// Using async/await
+test('async/await test', async () => {
+    const data = await fetchData();
+    expect(data).toBe('result');
+});
+
+// Testing rejected promises
+test('rejected promise', async () => {
+    await expect(fetchData()).rejects.toThrow('Error');
+});
+
+// Timeout for slow tests
+test('slow test', async () => {
+    await slowOperation();
+}, 10000); // 10 second timeout</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-server"></i> API Testing</h2>
+                <pre><code>// Install supertest
+// npm install --save-dev supertest
+
+const request = require('supertest');
+const app = require('./app');
+
+describe('User API', () => {
+    test('GET /api/users returns users', async () => {
+        const response = await request(app)
+            .get('/api/users')
+            .expect(200)
+            .expect('Content-Type', /json/);
+        
+        expect(response.body).toHaveProperty('data');
+        expect(Array.isArray(response.body.data)).toBe(true);
+    });
+    
+    test('POST /api/users creates user', async () => {
+        const newUser = {
+            name: 'John Doe',
+            email: 'john@example.com'
+        };
+        
+        const response = await request(app)
+            .post('/api/users')
+            .send(newUser)
+            .expect(201)
+            .expect('Content-Type', /json/);
+        
+        expect(response.body).toMatchObject(newUser);
+        expect(response.body).toHaveProperty('id');
+    });
+    
+    test('POST /api/users validates email', async () => {
+        const invalidUser = {
+            name: 'John Doe',
+            email: 'invalid-email'
+        };
+        
+        const response = await request(app)
+            .post('/api/users')
+            .send(invalidUser)
+            .expect(400);
+        
+        expect(response.body).toHaveProperty('error');
+    });
+    
+    test('GET /api/users/:id returns 404 for non-existent user', async () => {
+        await request(app)
+            .get('/api/users/999')
+            .expect(404);
+    });
+});</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-cog"></i> Setup & Teardown</h2>
+                <pre><code>describe('Database tests', () => {
+    // Runs before all tests
+    beforeAll(async () => {
+        await database.connect();
+    });
+    
+    // Runs before each test
+    beforeEach(async () => {
+        await database.clear();
+        await database.seed();
+    });
+    
+    // Runs after each test
+    afterEach(async () => {
+        await database.cleanup();
+    });
+    
+    // Runs after all tests
+    afterAll(async () => {
+        await database.disconnect();
+    });
+    
+    test('test 1', async () => {
+        // Test code
+    });
+    
+    test('test 2', async () => {
+        // Test code
+    });
+});</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-chart-bar"></i> Coverage</h2>
+                <pre><code># Generate coverage report
+npm test -- --coverage
+
+# Coverage in specific format
+npm test -- --coverage --coverageReporters="text" --coverageReporters="lcov"
+
+# View in browser
+npm test -- --coverage && open coverage/lcov-report/index.html
+
+# jest.config.js
+module.exports = {
+    collectCoverageFrom: [
+        'src/**/*.{js,ts}',
+        '!src/**/*.test.{js,ts}',
+        '!src/index.js'
+    ],
+    coverageThreshold: {
+        global: {
+            branches: 80,
+            functions: 80,
+            lines: 80,
+            statements: 80
+        }
+    }
+};</code></pre>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-check-circle"></i> Best Practices</h2>
+                <div class="tip-box">
+                    <ul>
+                        <li>✅ Write tests before or alongside code (TDD)</li>
+                        <li>✅ Use descriptive test names</li>
+                        <li>✅ Follow AAA pattern: Arrange, Act, Assert</li>
+                        <li>✅ Test edge cases and error conditions</li>
+                        <li>✅ Keep tests independent and isolated</li>
+                        <li>✅ Mock external dependencies</li>
+                        <li>✅ Aim for high coverage (>80%)</li>
+                        <li>✅ Use beforeEach/afterEach for setup/cleanup</li>
+                        <li>✅ Run tests in CI/CD pipeline</li>
+                        <li>✅ Keep tests fast and focused</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="navigation-links">
+                <a href="prisma.html" class="nav-link"><i class="fas fa-arrow-left"></i> Previous: Prisma ORM</a>
+                <a href="npm-packages.html" class="nav-link">Next: NPM & Packages <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        fetch('../../index.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sidebar = doc.querySelector('.sidebar');
+                if (sidebar) {
+                    document.getElementById('sidebarContainer').appendChild(sidebar);
+                    const event = new Event('sidebarLoaded');
+                    document.dispatchEvent(event);
+                }
+            });
+    </script>
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>
