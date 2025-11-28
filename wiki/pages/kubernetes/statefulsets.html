@@ -133,21 +133,71 @@
                 </section>
 
                 <section class="doc-section">
-                    <h2>Implementation Guide</h2>
-                    <p>
-                        Detailed implementation examples, code snippets, and step-by-step tutorials for StatefulSets 
-                        will be enhanced in future updates. For now, refer to official documentation and community resources.
-                    </p>
-                    <div class="example-box">
-                        <h4>ðŸ“š Recommended Resources</h4>
-                        <ul>
-                            <li>Official documentation and API references</li>
-                            <li>Industry best practices and design patterns</li>
-                            <li>Real-world case studies and examples</li>
-                            <li>Community tutorials and blog posts</li>
-                            <li>Video courses and interactive learning platforms</li>
-                        </ul>
+                    <h2>Implementation Examples</h2>
+                    <p>Berikut adalah contoh implementasi praktis yang dapat Anda pelajari dan terapkan. Setiap contoh menunjukkan best practices dan pola yang umum digunakan dalam industri.</p>
+                    
+                    <h3>Yaml Implementation</h3>
+                    <pre><code class="language-yaml"># Kubernetes Deployment Example
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: app
+        image: myapp:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: NODE_ENV
+          value: "production"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app-service
+spec:
+  selector:
+    app: my-app
+  ports:
+  - port: 80
+    targetPort: 3000
+  type: LoadBalancer</code></pre>
+
+                    
+                    <div class="info-box">
+                        <i class="fas fa-lightbulb"></i>
+                        <div>
+                            <strong>💡 Best Practice:</strong> Selalu ikuti prinsip-prinsip SOLID, gunakan dependency injection, dan pastikan code Anda testable. Untuk detail lebih lanjut, lihat dokumentasi resmi dari teknologi yang Anda gunakan.
+                        </div>
                     </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>📚 Additional Resources</h2>
+                    <ul>
+                        <li>Official documentation and API references</li>
+                        <li>GitHub repositories dengan real-world examples</li>
+                        <li>Online courses dan tutorial videos</li>
+                        <li>Community forums dan Stack Overflow discussions</li>
+                        <li>Industry blogs dan technical articles</li>
+                    </ul>
                 </section>
 
                 <section class="doc-section">
@@ -176,7 +226,7 @@
                 
                 if (sidebarElement) {
                     sidebarElement.innerHTML = sidebarContent;
-                    console.log('âœ… Sidebar loaded successfully');
+                    console.log('✅ Sidebar loaded successfully');
                     
                     // Dispatch event after sidebar is loaded
                     const event = new Event('sidebarLoaded');

@@ -134,21 +134,78 @@
                 </section>
 
                 <section class="doc-section">
-                    <h2>Implementation Guide</h2>
-                    <p>
-                        Detailed implementation examples, code snippets, and step-by-step tutorials for Message Queues 
-                        will be enhanced in future updates. For now, refer to official documentation and community resources.
-                    </p>
-                    <div class="example-box">
-                        <h4>ðŸ“š Recommended Resources</h4>
-                        <ul>
-                            <li>Official documentation and API references</li>
-                            <li>Industry best practices and design patterns</li>
-                            <li>Real-world case studies and examples</li>
-                            <li>Community tutorials and blog posts</li>
-                            <li>Video courses and interactive learning platforms</li>
-                        </ul>
+                    <h2>Implementation Examples</h2>
+                    <p>Berikut adalah contoh implementasi praktis yang dapat Anda pelajari dan terapkan. Setiap contoh menunjukkan best practices dan pola yang umum digunakan dalam industri.</p>
+                    
+                    <h3>Javascript Implementation</h3>
+                    <pre><code class="language-javascript">// Example: RESTful API with Express.js
+const express = require('express');
+const app = express();
+
+app.use(express.json());
+
+// GET endpoint
+app.get('/api/items', async (req, res) =&gt; {
+    const items = await database.getItems();
+    res.json(items);
+});
+
+// POST endpoint
+app.post('/api/items', async (req, res) =&gt; {
+    const newItem = await database.createItem(req.body);
+    res.status(201).json(newItem);
+});
+
+app.listen(3000, () =&gt; {
+    console.log('Server running on port 3000');
+});</code></pre>
+
+                    <h3>Csharp Implementation</h3>
+                    <pre><code class="language-csharp">// Example: ASP.NET Core API
+[ApiController]
+[Route("api/[controller]")]
+public class ItemsController : ControllerBase
+{
+    private readonly IItemService _itemService;
+    
+    public ItemsController(IItemService itemService)
+    {
+        _itemService = itemService;
+    }
+    
+    [HttpGet]
+    public async Task&lt;IActionResult&gt; GetItems()
+    {
+        var items = await _itemService.GetAllAsync();
+        return Ok(items);
+    }
+    
+    [HttpPost]
+    public async Task&lt;IActionResult&gt; CreateItem([FromBody] ItemDto dto)
+    {
+        var item = await _itemService.CreateAsync(dto);
+        return CreatedAtAction(nameof(GetItems), new { id = item.Id }, item);
+    }
+}</code></pre>
+
+                    
+                    <div class="info-box">
+                        <i class="fas fa-lightbulb"></i>
+                        <div>
+                            <strong>💡 Best Practice:</strong> Selalu ikuti prinsip-prinsip SOLID, gunakan dependency injection, dan pastikan code Anda testable. Untuk detail lebih lanjut, lihat dokumentasi resmi dari teknologi yang Anda gunakan.
+                        </div>
                     </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>📚 Additional Resources</h2>
+                    <ul>
+                        <li>Official documentation and API references</li>
+                        <li>GitHub repositories dengan real-world examples</li>
+                        <li>Online courses dan tutorial videos</li>
+                        <li>Community forums dan Stack Overflow discussions</li>
+                        <li>Industry blogs dan technical articles</li>
+                    </ul>
                 </section>
 
                 <section class="doc-section">
@@ -192,7 +249,7 @@
                 
                 if (sidebarElement) {
                     sidebarElement.innerHTML = sidebarContent;
-                    console.log('âœ… Sidebar loaded successfully');
+                    console.log('✅ Sidebar loaded successfully');
                     
                     // Dispatch event after sidebar is loaded
                     const event = new Event('sidebarLoaded');

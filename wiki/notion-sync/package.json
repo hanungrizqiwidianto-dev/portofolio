@@ -1,0 +1,37 @@
+{
+    "name": "wiki-notion-sync",
+    "version": "1.0.0",
+    "description": "Automatic sync wiki content to Notion",
+    "main": "sync.js",
+    "type": "module",
+    "scripts": {
+        "test": "node test-connection.js",
+        "sync": "node sync.js",
+        "sync:fast": "node sync-fast.js",
+        "sync:super": "node sync-super-fast.js",
+        "parse": "node test-parser.js",
+        "check": "node pre-sync-check.js",
+        "view": "node view-results.js",
+        "get-url": "node get-url.js",
+        "update-link": "node update-link.js",
+        "update-public": "node update-public-url.js",
+        "fix:encoding": "node fix-html-encoding.js",
+        "clean:resync": "node clean-resync.js",
+        "test:encoding": "node test-encoding.js",
+        "delete-all": "node delete-all.js",
+        "improve": "node improve-content.js",
+        "full-resync": "node improve-content.js && node sync-super-fast.js"
+    },
+    "keywords": [
+        "notion",
+        "wiki",
+        "sync"
+    ],
+    "author": "Hanung Rizqi Widianto",
+    "license": "MIT",
+    "dependencies": {
+        "@notionhq/client": "^2.2.15",
+        "cheerio": "^1.0.0-rc.12",
+        "dotenv": "^16.3.1"
+    }
+}

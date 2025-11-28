@@ -133,21 +133,75 @@
                 </section>
 
                 <section class="doc-section">
-                    <h2>Implementation Guide</h2>
-                    <p>
-                        Detailed implementation examples, code snippets, and step-by-step tutorials for Bulkhead Pattern 
-                        will be enhanced in future updates. For now, refer to official documentation and community resources.
-                    </p>
-                    <div class="example-box">
-                        <h4>ðŸ“š Recommended Resources</h4>
-                        <ul>
-                            <li>Official documentation and API references</li>
-                            <li>Industry best practices and design patterns</li>
-                            <li>Real-world case studies and examples</li>
-                            <li>Community tutorials and blog posts</li>
-                            <li>Video courses and interactive learning platforms</li>
-                        </ul>
+                    <h2>Implementation Examples</h2>
+                    <p>Berikut adalah contoh implementasi praktis yang dapat Anda pelajari dan terapkan. Setiap contoh menunjukkan best practices dan pola yang umum digunakan dalam industri.</p>
+                    
+                    <h3>Javascript Implementation</h3>
+                    <pre><code class="language-javascript">// Design Pattern Implementation Example
+class Service {
+    constructor() {
+        this.cache = new Map();
+    }
+    
+    async getData(id) {
+        // Check cache first
+        if (this.cache.has(id)) {
+            return this.cache.get(id);
+        }
+        
+        // Fetch from source
+        const data = await this.fetchFromSource(id);
+        
+        // Cache result
+        this.cache.set(id, data);
+        
+        return data;
+    }
+}</code></pre>
+
+                    <h3>Csharp Implementation</h3>
+                    <pre><code class="language-csharp">// Design Pattern Implementation Example
+public class Service : IService
+{
+    private readonly IRepository _repository;
+    private readonly ILogger&lt;Service&gt; _logger;
+    
+    public Service(IRepository repository, ILogger&lt;Service&gt; logger)
+    {
+        _repository = repository;
+        _logger = logger;
+    }
+    
+    public async Task&lt;Result&gt; ProcessAsync(Request request)
+    {
+        _logger.LogInformation("Processing request {Id}", request.Id);
+        
+        var data = await _repository.GetAsync(request.Id);
+        
+        // Business logic here
+        
+        return new Result { Success = true, Data = data };
+    }
+}</code></pre>
+
+                    
+                    <div class="info-box">
+                        <i class="fas fa-lightbulb"></i>
+                        <div>
+                            <strong>💡 Best Practice:</strong> Selalu ikuti prinsip-prinsip SOLID, gunakan dependency injection, dan pastikan code Anda testable. Untuk detail lebih lanjut, lihat dokumentasi resmi dari teknologi yang Anda gunakan.
+                        </div>
                     </div>
+                </section>
+
+                <section class="doc-section">
+                    <h2>📚 Additional Resources</h2>
+                    <ul>
+                        <li>Official documentation and API references</li>
+                        <li>GitHub repositories dengan real-world examples</li>
+                        <li>Online courses dan tutorial videos</li>
+                        <li>Community forums dan Stack Overflow discussions</li>
+                        <li>Industry blogs dan technical articles</li>
+                    </ul>
                 </section>
 
                 <section class="doc-section">
@@ -176,7 +230,7 @@
                 
                 if (sidebarElement) {
                     sidebarElement.innerHTML = sidebarContent;
-                    console.log('âœ… Sidebar loaded successfully');
+                    console.log('✅ Sidebar loaded successfully');
                     
                     // Dispatch event after sidebar is loaded
                     const event = new Event('sidebarLoaded');
